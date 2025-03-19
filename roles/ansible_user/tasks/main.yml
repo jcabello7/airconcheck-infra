@@ -1,0 +1,23 @@
+---
+- name: Create a dedicated user for Ansible
+  user:
+    name: "{{ ansible_dedicated_user }}"
+    shell: /bin/bash
+    create_home: yes
+    groups: sudo
+    append: yes
+    state: present
+
+- name: Add a SSH key for the Ansible user
+  authorized_key:
+    user: "{{ ansible_dedicated_user }}"
+    state: present
+    key: "{{ lookup('file', ansible_ssh_pub_key_path) }}"
+
+- name: Permit ansible run sudo commands without password
+  lineinfile:
+    dest: /etc/sudoers.d/{{ ansible_dedicated_user }}
+    state: present
+    create: yes
+    mode: '0440'
+    line: '{{ ansible_dedicated_user }} ALL=(ALL) NOPASSWD:ALL'

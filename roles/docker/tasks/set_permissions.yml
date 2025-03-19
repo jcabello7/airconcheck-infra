@@ -1,0 +1,23 @@
+---
+- name: Ensure /opt/airconcheck exists with correct ownership
+  file:
+    path: "{{ app_base_path }}"
+    state: directory
+    owner: dockeruser
+    group: dockeruser
+    mode: '0755'
+
+- name: Set correct ownership and permissions for service directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ app_base_path }}/mariadb", owner: "dockeruser", group: "dockeruser", mode: "0755" }
+    - { path: "{{ app_base_path }}/phpmyadmin", owner: "dockeruser", group: "dockeruser", mode: "0755" }
+    - { path: "{{ app_base_path }}/portainer", owner: "dockeruser", group: "dockeruser", mode: "0755" }
+    - { path: "{{ app_base_path }}/swag/external", owner: "dockeruser", group: "dockeruser", mode: "0755" }
+    - { path: "{{ app_base_path }}/swag/internal", owner: "dockeruser", group: "dockeruser", mode: "0755" }
+    - { path: "{{ app_base_path }}/wordpress", owner: "www-data", group: "www-data", mode: "0755" }

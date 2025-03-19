@@ -1,0 +1,30 @@
+---
+#- name: Ensure docker-compose file exists
+#  copy:
+#    src: files/docker-compose.yaml
+#    dest: "{{ app_base_path }}/docker-compose.yaml"
+#    owner: dockeruser
+#    group: dockeruser
+#    mode: '0644'
+- name: Generate .env file from template
+  template:
+    src: "templates/.env.j2"
+    dest: "{{ app_base_path }}/.env"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0644"
+
+- name: Generate docker-compose.yaml from template
+  template:
+    src: "templates/docker-compose.yaml.j2"
+    dest: "{{ app_base_path }}/docker-compose.yaml"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0644"
+#    force: yes # Force changes in the template to the docker-compose.yaml
+
+- name: Deploy Docker containers
+  command: docker-compose --env-file {{ app_base_path }}/.env -f {{ app_base_path }}/docker-compose.yaml up -d --force-recreate
+  args:
+    chdir: "{{ app_base_path }}"
+

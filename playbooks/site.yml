@@ -1,0 +1,7 @@
+---
+- name: Config the server
+  hosts: all
+  become: true
+  roles:
+    - ansible_user
+    - docker
