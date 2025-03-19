@@ -1,10 +1,6 @@
 # Ignore sensible files
-*.env
-group_vars/*.yml  # Excluye variables con credenciales
-!group_vars/all.yml  # Mantiene el archivo con variables generales
-inventories/prod.ini
-inventories/test.ini
-inventories/dev.ini
+group_vars/all.yml
+
 
 # Ignore cache and temp files
 __pycache__/
