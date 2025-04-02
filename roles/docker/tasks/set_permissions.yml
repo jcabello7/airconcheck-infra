@@ -15,9 +15,8 @@
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
-    - { path: "{{ app_base_path }}/mariadb", owner: "dockeruser", group: "dockeruser", mode: "0755" }
-    - { path: "{{ app_base_path }}/phpmyadmin", owner: "dockeruser", group: "dockeruser", mode: "0755" }
     - { path: "{{ app_base_path }}/portainer", owner: "dockeruser", group: "dockeruser", mode: "0755" }
-    - { path: "{{ app_base_path }}/swag/external", owner: "dockeruser", group: "dockeruser", mode: "0755" }
-    - { path: "{{ app_base_path }}/swag/internal", owner: "dockeruser", group: "dockeruser", mode: "0755" }
-    - { path: "{{ app_base_path }}/wordpress", owner: "www-data", group: "www-data", mode: "0755" }
+    - { path: "{{ app_base_path }}/swag/external", owner: "jose", group: "jose", mode: "0755" }
+    - { path: "{{ app_base_path }}/swag/internal", owner: "jose", group: "jose", mode: "0755" }
+    - { path: "{{ app_base_path }}/frontend/dist", owner: "jose", group: "jose", mode: "0755" }
+

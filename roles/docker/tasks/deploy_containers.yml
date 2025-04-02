@@ -23,8 +23,14 @@
     mode: "0644"
 #    force: yes # Force changes in the template to the docker-compose.yaml
 
+- name: Eliminar contenidors orfes
+  command: docker-compose --env-file {{ app_base_path }}/.env -f {{ app_base_path }}/docker-compose.yaml down --remove-orphans
+  args:
+    chdir: "{{ app_base_path }}"
+
 - name: Deploy Docker containers
   command: docker-compose --env-file {{ app_base_path }}/.env -f {{ app_base_path }}/docker-compose.yaml up -d --force-recreate
   args:
     chdir: "{{ app_base_path }}"
-
+  register: docker_up
+  failed_when: docker_up.rc != 0 and "'ERROR'" in docker_up.stderr

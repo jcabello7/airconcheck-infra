@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1743332875904,
+  "timestamp": 1743633721350,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -12,10 +12,10 @@
       },
       "urls": [
         "/index.html",
-        "/main-PAIWEJLD.js",
+        "/main-ABRDSQY3.js",
         "/manifest.webmanifest",
         "/polyfills-FFHMD2TL.js",
-        "/styles-7N7QGMUX.css"
+        "/styles-E6LWLDNN.css"
       ],
       "patterns": []
     },
@@ -27,13 +27,19 @@
         "ignoreVary": true
       },
       "urls": [
+        "/fonts/Overpass-Black.woff",
+        "/fonts/Roboto-Bold.woff",
+        "/fonts/Roboto-Regular.woff",
         "/icons/aircon-128x128.png",
         "/icons/aircon-192x192.png",
         "/icons/aircon-512x512.png",
         "/icons/aircon-96x96.png",
         "/icons/cerrar.png",
+        "/icons/check.png",
+        "/icons/entrar.webp",
         "/icons/facebook.png",
         "/icons/favicon.svg",
+        "/icons/hero.webp",
         "/icons/ico.png",
         "/icons/icon-128x128.png",
         "/icons/icon-144x144.png",
@@ -56,13 +62,19 @@
   ],
   "dataGroups": [],
   "hashTable": {
+    "/fonts/Overpass-Black.woff": "f7090840e1f6a325d56209f9042d4f29466ba83b",
+    "/fonts/Roboto-Bold.woff": "960fa3e47a8711c84b353efcd8d2ed20edbd6a5d",
+    "/fonts/Roboto-Regular.woff": "3f8c61f441298a9771c36248c379651a66254bb9",
     "/icons/aircon-128x128.png": "f06ad0433a1ec655d77293c4c2b44d5ed5cec122",
     "/icons/aircon-192x192.png": "51608d53ea515db8f973e825698ae3b852d8c285",
     "/icons/aircon-512x512.png": "1f79bcd8f48f6736647bc1be5536bd475589876b",
     "/icons/aircon-96x96.png": "1d6362792a0d4c851c02f88e168a72f1771869a3",
     "/icons/cerrar.png": "e3c18b23ff7965e2a2beab4bf1d251ad732537ca",
+    "/icons/check.png": "d210e25b636deb3c80f2d887497f486b4219efab",
+    "/icons/entrar.webp": "8442a33fd4381bebf230ecb07c31cfcaf909599b",
     "/icons/facebook.png": "f57ec01cd6707cf3b2ebba0c263a2c99e938c0ef",
     "/icons/favicon.svg": "b94d1be4a22fbc8c5327fcc24bcbc97547bc8988",
+    "/icons/hero.webp": "4517e1034e6979c75355279e5cddeba6d574efcb",
     "/icons/ico.png": "78b2c1f8625a7f4c7245a740c3bf8f7de1af49ab",
     "/icons/icon-128x128.png": "f912963bdc6d5a38d8f1dd0afbaab2ce8d657acb",
     "/icons/icon-144x144.png": "b155fd5f2fd5d2ea7760721063003c4cd95fd783",
@@ -79,11 +91,11 @@
     "/icons/logo.png": "4b2961e5c4a76903d3ce33d8cafe78680f640c1f",
     "/icons/menu.png": "6067846c58ddfedc9b875784ae1e8875d035bbd6",
     "/icons/twitter.png": "2d9635b9f1af1729c5001d234ac1c365bce4df22",
-    "/index.html": "bb0d342e6e2e21f0a86ebcc0c169e7d891a4d005",
-    "/main-PAIWEJLD.js": "9602135e2b7fbe47d35b0b4c92e585339b6fd1ab",
-    "/manifest.webmanifest": "a7339f20b644a5f780d1e2394cab548807df34ff",
+    "/index.html": "bc29d81a0b05e8a4c60107ff9c8bfb5c5d1a7aac",
+    "/main-ABRDSQY3.js": "73ad639ec9a577e491dd35e4abfc50bfec68b1f2",
+    "/manifest.webmanifest": "e7cf5a20a377019a432b9f6803a47d3820cd01bb",
     "/polyfills-FFHMD2TL.js": "f49b49a155bc7d192db62a4c15d0a612b460a667",
-    "/styles-7N7QGMUX.css": "490374983733d033dc7c39cd69c41a3803e45714"
+    "/styles-E6LWLDNN.css": "7cc5c07330b577b5009b581daed655b3380c7b86"
   },
   "navigationUrls": [
     {
