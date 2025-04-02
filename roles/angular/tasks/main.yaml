@@ -1,0 +1,7 @@
+- name: Copy angular build
+  copy:
+    src: dist/
+    dest: "{{ app_base_path }}/frontend/dist/"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0755"

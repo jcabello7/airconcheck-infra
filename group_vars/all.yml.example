@@ -5,24 +5,6 @@ pgid: "988"
 timezone: "Europe/Madrid"
 app_base_path: "/opt/airconcheck"
 
-# MariaDB
-mariadb_root_password: "xxxxxxxxxxx"
-mariadb_database: "dbname"
-mariadb_user: "dbusername"
-mariadb_password: "xxxxxxxxxxx"
-mariadb_version: "11.4.5"
-
-# phpMyAdmin
-phpmyadmin_host: "mariadb"
-phpmyadmin_version: "5.2.2-apache"
-
-# WordPress
-wordpress_db_host: "mariadb:3306"
-wordpress_db_user: "{{ mariadb_user }}"
-wordpress_db_password: "{{ mariadb_password }}"
-wordpress_db_name: "{{ mariadb_database }}"
-wordpress_version: "6.7.2-php8.2-apache"
-
 # Portainer
 portainer_version: "2.27.1"
 
@@ -41,4 +23,7 @@ swag_internal_subdomains: "wildcard"
 swag_internal_validation: "dns"
 swag_internal_dnsplugin: "cloudflare"
 
-
+# MongoDB
+mongodb_version: "7"
+mongodb_root_user: "airconcheck"
+mongodb_root_password: "supersecurepassword"

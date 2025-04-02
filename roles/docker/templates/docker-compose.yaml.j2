@@ -8,60 +8,6 @@ networks:
     driver: bridge
 
 services:
-  mariadb:
-    image: linuxserver/mariadb:${MARIADB_VERSION}
-    container_name: mariadb
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - TZ=${TZ}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    volumes:
-      - {{ app_base_path }}/mariadb:/config
-    restart: unless-stopped
-    networks:
-      - internal_db
-
-  wordpress:
-    image: wordpress:${WORDPRESS_VERSION}
-    container_name: wordpress
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
-      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
-      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
-      - TZ=${TZ}
-    volumes:
-      - {{ app_base_path }}/wordpress:/var/www/html
-      - {{ app_base_path }}/wordpress/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-    depends_on:
-      - mariadb
-    restart: unless-stopped
-    networks:
-      - proxy
-      - internal_db
-
-  phpmyadmin:
-    image: phpmyadmin:${PHPMYADMIN_VERSION}
-    container_name: phpmyadmin
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - PMA_HOST=${PMA_HOST}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - TZ=${TZ}
-    restart: unless-stopped
-    networks:
-      - internal_db
-      - management
-
   portainer:
     image: portainer/portainer-ce:${PORTAINER_VERSION}
     container_name: portainer
@@ -90,8 +36,6 @@ services:
     ports:
       - "443:443"
       - "80:80"
-    depends_on:
-      - wordpress
     restart: unless-stopped
     networks:
       - proxy
@@ -114,8 +58,41 @@ services:
     ports:
       - "8443:443"
     depends_on:
-      - phpmyadmin
       - portainer
     restart: unless-stopped
     networks:
       - management
+  frontend:
+    image: nginx:alpine
+    container_name: airconcheck_frontend
+    volumes:
+      - {{ app_base_path }}/frontend/dist:/usr/share/nginx/html:ro
+    networks:
+      - proxy
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: {{ app_base_path }}/backend
+      dockerfile: ../docker/express/Dockerfile
+    container_name: airconcheck_backend
+    env_file:
+      - {{ app_base_path }}/backend/.env
+    networks:
+      - proxy
+      - internal_db
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:{{ mongodb_version }}
+    container_name: airconcheck_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: {{ mongodb_root_user }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ mongodb_root_password }}
+    volumes:
+      - {{ app_base_path }}/mongodb:/data/db
+    networks:
+      - internal_db
+    restart: unless-stopped

@@ -5,3 +5,6 @@
   roles:
     - ansible_user
     - docker
+    - angular
+    # - express
+    - mongodb
