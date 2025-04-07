@@ -62,14 +62,19 @@ services:
     restart: unless-stopped
     networks:
       - management
-  frontend:
-    image: nginx:alpine
-    container_name: airconcheck_frontend
-    volumes:
-      - {{ app_base_path }}/frontend/dist:/usr/share/nginx/html:ro
+      
+  angular-ssr:
+    build:
+      context: {{ angular_ssr_build_context | default('../angular-ssr') }}
+      dockerfile: Dockerfile
+    container_name: angular-ssr
+    expose:
+      - "4000"
     networks:
       - proxy
+      - internal_db
     restart: unless-stopped
+
 
 #  backend:
 #    build:
