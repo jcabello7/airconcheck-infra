@@ -2,6 +2,8 @@
 - name: Config the server
   hosts: all
   become: true
+  vars_files:
+    - ../group_vars/secrets.yml  # Ruta relativa desde playbooks/
   roles:
     - ansible_user
     - docker
