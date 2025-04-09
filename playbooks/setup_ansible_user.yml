@@ -1,0 +1,4 @@
+- hosts: airconcheck_test
+  become: true
+  roles:
+    - ansible_user

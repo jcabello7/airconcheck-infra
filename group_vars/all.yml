@@ -1,0 +1,34 @@
+---
+# General settings
+puid: "996"
+pgid: "988"
+timezone: "Europe/Madrid"
+app_base_path: "/opt/airconcheck"
+
+# Portainer
+portainer_version: "2.27.1"
+
+# SWAG
+swag_version: "version-3.3.0"
+
+# SWAG External (Let's Encrypt)
+swag_external_url: "airconcheck.com"
+swag_external_subdomains: "wildcard"
+swag_external_validation: "dns"
+swag_external_dnsplugin: "cloudflare"
+
+# SWAG Internal
+swag_internal_url: "airconcheck.com"
+swag_internal_subdomains: "wildcard"
+swag_internal_validation: "dns"
+swag_internal_dnsplugin: "cloudflare"
+
+# MongoDB
+mongodb_version: "7"
+
+# Directory of angular-ssr build context
+angular_ssr_build_context: "/opt/airconcheck/angular-ssr"
+
+swag_internal_services:
+  - name: portainer
+    port: 9000

@@ -1,5 +1,5 @@
 # Ignore sensible files
-group_vars/all.yml
+group_vars/secrets.yml
 
 
 # Ignore cache and temp files
