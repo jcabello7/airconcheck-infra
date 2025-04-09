@@ -65,5 +65,8 @@
     mode: '0755'
   loop: "{{ app_directories }}"
 
+- name: Configurar SWAG
+  import_tasks: configure_swag.yml
+
 - import_tasks: set_permissions.yml
 - import_tasks: deploy_containers.yml
