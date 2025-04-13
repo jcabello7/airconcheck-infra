@@ -1,5 +1,4 @@
 ---
-app_base_path: "/opt/airconcheck"
 
 # Docker networks
 docker_networks:
@@ -12,7 +11,7 @@ docker_networks:
 
 # Needed directories for Airconcheck
 app_directories:
-  - "{{ app_base_path }}/frontend"
-  - "{{ app_base_path }}/portainer"
-  - "{{ app_base_path }}/swag/external"
-  - "{{ app_base_path }}/swag/internal"
+  - "{{ global_defaults.app_base_path }}/frontend"
+  - "{{ global_defaults.app_base_path }}/portainer"
+  - "{{ global_defaults.app_base_path }}/swag/external"
+  - "{{ global_defaults.app_base_path }}/swag/internal"

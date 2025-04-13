@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - {{ app_base_path }}/portainer:/data
+      - {{ global_defaults.app_base_path }}/portainer:/data
     networks:
       - management
 
@@ -32,7 +32,7 @@ services:
       - VALIDATION=${SWAG_EXTERNAL_VALIDATION}
       - DNSPLUGIN=${SWAG_EXTERNAL_DNSPLUGIN}
     volumes:
-      - {{ app_base_path }}/swag/external:/config
+      - {{ global_defaults.app_base_path }}/swag/external:/config
     ports:
       - "443:443"
       - "80:80"
@@ -54,7 +54,7 @@ services:
       - VALIDATION=${SWAG_INTERNAL_VALIDATION}
       - DNSPLUGIN=${SWAG_INTERNAL_DNSPLUGIN}
     volumes:
-      - {{ app_base_path }}/swag/internal:/config
+      - {{ global_defaults.app_base_path }}/swag/internal:/config
     ports:
       - "8443:443"
     depends_on:
@@ -78,11 +78,11 @@ services:
 
 #  backend:
 #    build:
-#      context: {{ app_base_path }}/backend
+#      context: {{ global_defaults.app_base_path }}/backend
 #      dockerfile: ../docker/express/Dockerfile
 #    container_name: airconcheck_backend
 #    env_file:
-#      - {{ app_base_path }}/backend/.env
+#      - {{ global_defaults.app_base_path }}/backend/.env
 #    networks:
 #      - proxy
 #      - internal_db
@@ -91,13 +91,13 @@ services:
 #    restart: unless-stopped
 
   mongodb:
-    image: mongo:{{ mongodb_version }}
+    image: mongo:{{ global_defaults.mongodb_version }}
     container_name: airconcheck_mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongodb_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongodb_root_password }}
     volumes:
-      - {{ app_base_path }}/mongodb:/data/db
+      - {{ global_defaults.app_base_path }}/mongodb:/data/db
     networks:
       - internal_db
     restart: unless-stopped
