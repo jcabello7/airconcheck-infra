@@ -1,7 +1,7 @@
 - name: Copy Express.js backend files
   copy:
     src: backend/
-    dest: "{{ app_base_path }}/backend/"
+    dest: "{{ global_defaults.app_base_path }}/backend/"
     owner: dockeruser
     group: dockeruser
     mode: "0755"
@@ -9,7 +9,7 @@
 - name: Copy express Dockerfile
   copy:
     src: Dockerfile
-    dest: "{{ app_base_path }}/docker/express/Dockerfile"
+    dest: "{{ global_defaults.app_base_path }}/docker/express/Dockerfile"
     owner: dockeruser
     group: dockeruser
     mode: "0644"

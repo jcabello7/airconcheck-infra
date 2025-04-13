@@ -1,7 +1,7 @@
 - name: Crear configuración SWAG EXTERNAL para Angular SSR
   template:
     src: swag-site-confs/angular-ssr.subdomain.conf.j2
-    dest: "{{ app_base_path }}/swag/external/nginx/proxy-confs/angular-ssr.subdomain.conf"
+    dest: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/angular-ssr.subdomain.conf"
     owner: root
     group: root
     mode: "0644"
@@ -9,11 +9,11 @@
 - name: Crear configuración SWAG INTERNAL para cada servicio
   template:
     src: swag-site-confs/internal-service.subdomain.conf.j2
-    dest: "{{ app_base_path }}/swag/internal/nginx/proxy-confs/{{ item.name }}.subdomain.conf"
+    dest: "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs/{{ item.name }}.subdomain.conf"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ swag_internal_services }}"
+  loop: "{{ global_defaults.swag_internal_services }}"
   vars:
     swag_internal_service_name: "{{ item.name }}"
     swag_internal_service_port: "{{ item.port }}"
@@ -21,7 +21,7 @@
 - name: Generar dns-conf.ini para SWAG EXTERNAL
   template:
     src: swag/dns-conf.ini.j2
-    dest: "{{ app_base_path }}/swag/external/dns-conf.ini"
+    dest: "{{ global_defaults.app_base_path }}/swag/external/dns-conf.ini"
     owner: root
     group: root
     mode: "0600"
@@ -29,7 +29,7 @@
 - name: Generar dns-conf.ini para SWAG INTERNAL
   template:
     src: swag/dns-conf.ini.j2
-    dest: "{{ app_base_path }}/swag/internal/dns-conf.ini"
+    dest: "{{ global_defaults.app_base_path }}/swag/internal/dns-conf.ini"
     owner: root
     group: root
     mode: "0600"

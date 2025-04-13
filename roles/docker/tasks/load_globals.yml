@@ -1,0 +1,4 @@
+- name: Load global defaults without overwriting environment-specific vars
+  include_vars:
+    file: "{{ playbook_dir }}/../group_vars/all.yml"
+    name: global_defaults

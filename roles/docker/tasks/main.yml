@@ -1,7 +1,8 @@
 ---
-- name: Load environment variables
-  include_vars:
-    file: "{{ inventory_dir }}/../group_vars/all.yml"
+#- name: Load environment variables
+#  include_vars:
+#    file: "{{ playbook_dir }}/../group_vars/all.yml"
+- import_tasks: load_globals.yml
 
 - name: Delete docker snap
   command: snap remove docker

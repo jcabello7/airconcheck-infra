@@ -1,7 +1,7 @@
 ---
 - name: Ensure /opt/airconcheck exists with correct ownership
   file:
-    path: "{{ app_base_path }}"
+    path: "{{ global_defaults.app_base_path }}"
     state: directory
     owner: dockeruser
     group: dockeruser
@@ -15,8 +15,8 @@
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
-    - { path: "{{ app_base_path }}/portainer", owner: "dockeruser", group: "dockeruser", mode: "0755" }
-    - { path: "{{ app_base_path }}/swag/external", owner: "jose", group: "jose", mode: "0755" }
-    - { path: "{{ app_base_path }}/swag/internal", owner: "jose", group: "jose", mode: "0755" }
-    - { path: "{{ app_base_path }}/frontend/dist", owner: "jose", group: "jose", mode: "0755" }
+    - { path: "{{ global_defaults.app_base_path }}/portainer", owner: "dockeruser", group: "dockeruser", mode: "0755" }
+    - { path: "{{ global_defaults.app_base_path }}/swag/external", owner: "jose", group: "jose", mode: "0755" }
+    - { path: "{{ global_defaults.app_base_path }}/swag/internal", owner: "jose", group: "jose", mode: "0755" }
+    - { path: "{{ global_defaults.app_base_path }}/frontend/dist", owner: "jose", group: "jose", mode: "0755" }
 
