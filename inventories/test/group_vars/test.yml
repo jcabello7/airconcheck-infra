@@ -1,5 +1,10 @@
 ---
 swag_external_url: "test.airconcheck.com"
 swag_internal_url: "test.airconcheck.com"
+swag_internal_services:
+  - name: portainer
+    port: 9000
+  - name: backend
+    port: 3000
 
 

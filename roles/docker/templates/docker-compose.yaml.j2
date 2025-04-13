@@ -76,19 +76,21 @@ services:
     restart: unless-stopped
 
 
-#  backend:
-#    build:
-#      context: {{ global_defaults.app_base_path }}/backend
-#      dockerfile: ../docker/express/Dockerfile
-#    container_name: airconcheck_backend
-#    env_file:
-#      - {{ global_defaults.app_base_path }}/backend/.env
-#    networks:
-#      - proxy
-#      - internal_db
-#    depends_on:
-#      - mongodb
-#    restart: unless-stopped
+  backend:
+    build:
+      context: {{ global_defaults.app_base_path }}/backend
+      dockerfile: ../docker/express/Dockerfile
+    container_name: airconcheck_backend
+    env_file:
+      - {{ global_defaults.app_base_path }}/backend/.env
+    networks:
+      - proxy
+      - internal_db
+    depends_on:
+      - mongodb
+    expose:
+      - "3000"
+    restart: unless-stopped
 
   mongodb:
     image: mongo:{{ global_defaults.mongodb_version }}
