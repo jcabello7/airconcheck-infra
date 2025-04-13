@@ -1,0 +1,19 @@
+- hosts: all
+  gather_facts: false
+  tasks:
+
+    - name: Mostrar variable swag_internal_url
+      debug:
+        msg: "swag_internal_url: {{ swag_internal_url | default('NO DEFINIDA') }}"
+
+    - name: Mostrar variable swag_external_url
+      debug:
+        msg: "swag_external_url: {{ swag_external_url | default('NO DEFINIDA') }}"
+
+    - name: Mostrar dominios usados
+      debug:
+        var: swag_internal_services
+
+    - name: Mostrar todas las variables swag_*
+      debug:
+        var: hostvars[inventory_hostname] | dict2items | selectattr('key', 'search', '^swag_') | list
