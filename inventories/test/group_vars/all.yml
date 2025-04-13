@@ -1,4 +1,3 @@
 ---
-app_base_path: "/opt/airconcheck"
 swag_external_url: "test.airconcheck.com"
 swag_internal_url: "test.airconcheck.com"

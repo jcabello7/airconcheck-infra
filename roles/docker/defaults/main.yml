@@ -12,9 +12,7 @@ docker_networks:
 
 # Needed directories for Airconcheck
 app_directories:
-  - "{{ app_base_path }}/mariadb"
-  - "{{ app_base_path }}/wordpress"
-  - "{{ app_base_path }}/phpmyadmin"
+  - "{{ app_base_path }}/frontend"
   - "{{ app_base_path }}/portainer"
   - "{{ app_base_path }}/swag/external"
   - "{{ app_base_path }}/swag/internal"
