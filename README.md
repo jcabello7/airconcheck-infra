@@ -71,7 +71,20 @@ vim group_vars/secrets.yml
 ## 🔧 Network Overview
 
 ![Network Diagram](docs/docker-network.png)
+[proxy]
+ ├─ angular-ssr (4000)
+ └─ swag-external (443)
+     ↑ public endpoint
 
+[internal_db]
+ ├─ angular-ssr
+ └─ mongodb (27017)
+
+[management]
+ ├─ portainer (9000)
+ └─ swag-internal (8443)
+     ↑ private endpoint
+     
 ---
 
 ## 🧑‍💻 How to Contribute

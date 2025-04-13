@@ -74,7 +74,7 @@ vim group_vars/secrets.yml
 [proxy]
  ├─ angular-ssr (4000)
  └─ swag-external (443)
-     ↑ public endpoint
+     ↑ endpoint público
 
 [internal_db]
  ├─ angular-ssr
@@ -83,7 +83,7 @@ vim group_vars/secrets.yml
 [management]
  ├─ portainer (9000)
  └─ swag-internal (8443)
-     ↑ private endpoint
+     ↑ endpoint privado
 
 ---
 
