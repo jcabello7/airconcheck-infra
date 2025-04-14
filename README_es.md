@@ -133,6 +133,25 @@ Este sistema permite separar entornos y tener despliegues seguros y flexibles.
 
 ---
 
+## 🚀 Contenedores Desplegados
+
+| Contenedor          | Puertos                | Redes              | Notas                                             |
+|---------------------|------------------------|--------------------|---------------------------------------------------|
+| portainer           | 9000 (solo interno)    | management         | Interfaz web para Docker                          |
+| swag-external       | 443, 80                | proxy              | Proxy externo con Let's Encrypt                  |
+| swag-internal       | 8443                   | management         | Proxy interno (acceso solo desde VPN)            |
+| angular-ssr         | 4000                   | proxy, internal_db | Frontend Angular SSR servido vía SWAG            |
+| airconcheck_backend | 3000 (solo en test)    | proxy, internal_db | API backend Node.js Express                      |
+| airconcheck_mongodb | —                      | internal_db        | Base de datos MongoDB                             |
+
+## 🌍 URLs por Entorno
+
+| Entorno    | URL del Frontend                    | URL del Backend                                |
+|------------|--------------------------------------|------------------------------------------------|
+| Test       | https://test.airconcheck.com         | https://api.test.airconcheck.com:8443 + `localhost:3000` |
+| Producción | https://airconcheck.com              | *No expuesto*                                  |
+
+---
 
 ## 🚀 Contenedores desplegados: Backend
 

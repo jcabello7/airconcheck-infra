@@ -36,4 +36,5 @@ backend_build_context: "/opt/airconcheck/backend"
 swag_internal_services:
   - name: portainer
     port: 9000
-
+  - name: airconcheck_backend
+    port: 3000

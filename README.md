@@ -134,6 +134,25 @@ Happy hacking!
 
 ---
 
+## 🚀 Deployed Containers
+
+| Container            | Ports                  | Networks           | Notes                                             |
+|---------------------|------------------------|--------------------|---------------------------------------------------|
+| portainer           | 9000 (internal only)   | management         | Web UI for Docker                                 |
+| swag-external       | 443, 80                | proxy              | External reverse proxy with Let's Encrypt        |
+| swag-internal       | 8443                   | management         | Internal reverse proxy (VPN-only access)         |
+| angular-ssr         | 4000                   | proxy, internal_db | Angular frontend (SSR) served via SWAG           |
+| airconcheck_backend | 3000 (only in test)    | proxy, internal_db | Node.js Express backend API                      |
+| airconcheck_mongodb | —                      | internal_db        | MongoDB database                                  |
+
+## 🌍 URLs per Environment
+
+| Environment | Frontend URL                        | Backend URL                          |
+|-------------|-------------------------------------|--------------------------------------|
+| Test        | https://test.airconcheck.com        | https://api.test.airconcheck.com:8443 + `localhost:3000` |
+| Production  | https://airconcheck.com             | *Not exposed*                        |
+
+---
 
 ## 🚀 Deployed Containers: Backend
 
