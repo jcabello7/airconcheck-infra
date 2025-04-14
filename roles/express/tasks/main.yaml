@@ -16,3 +16,10 @@
     dest: "{{ global_defaults.app_base_path }}/backend/"
     mode: "0755"
   when: backend_copy_build is defined and backend_copy_build
+
+- name: Add "jose" as owner of dist/
+  file:
+    path: "{{ global_defaults.backend_build_context | default('/opt/airconcheck/backend') }}"
+    owner: jose
+    group: jose
+    recurse: true
