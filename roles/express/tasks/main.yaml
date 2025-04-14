@@ -17,7 +17,7 @@
     mode: "0755"
   when: backend_copy_build is defined and backend_copy_build
 
-- name: Add "jose" as owner of dist/
+- name: Add "jose" as owner of backend/
   file:
     path: "{{ global_defaults.backend_build_context | default('/opt/airconcheck/backend') }}"
     owner: jose
