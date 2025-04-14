@@ -130,3 +130,45 @@ Este sistema permite separar entornos y tener despliegues seguros y flexibles.
 - Haz PRs claros, limpios y con buen historial de commits
 
 ¡Feliz automatización!
+
+---
+
+
+## 🚀 Contenedores desplegados: Backend
+
+El backend es un servicio Node.js (Express) que sirve como API principal para el frontend Angular.
+
+| Contenedor            | Puertos         | Redes                   | Notas                                 |
+|-----------------------|-----------------|--------------------------|----------------------------------------|
+| airconcheck_backend   | 3000 (solo en test) | proxy, internal_db     | Se compila desde `/opt/airconcheck/backend` |
+
+---
+
+## 🌍 URLs por entorno
+
+| Entorno    | URL                                 | Notas                        |
+|------------|--------------------------------------|------------------------------|
+| Test       | https://api.test.airconcheck.com:8443 | Acceso vía swag-internal    |
+| Producción | *No expuesto*                        | El backend solo es usado internamente |
+
+En el entorno de test, también se puede acceder al backend vía `localhost:3000` si `expose_backend_port: true` está activado.
+
+---
+
+## 🔐 Gestión de secretos
+
+Para la conexión a MongoDB desde el backend, asegúrate de que el archivo `.env` en `/opt/airconcheck/backend/.env` contenga:
+
+```env
+MONGO_URL=mongodb://<usuario>:<contraseña>@mongodb:27017
+```
+
+Esto puede gestionarse desde Ansible usando `backend.env.j2` y variables por entorno.
+
+---
+
+## 🔗 Diagrama de red Docker (incluyendo backend)
+
+- `backend` está conectado a:
+  - `proxy`: para acceso desde swag-internal
+  - `internal_db`: para conectar con `mongodb`

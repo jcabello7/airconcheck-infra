@@ -78,11 +78,11 @@ services:
 
   backend:
     build:
-      context: {{ global_defaults.backend_build_context | default('../backend')}}
+      context: {{ global_defaults.backend_build_context | default('../backend') }}
       dockerfile: Dockerfile
     container_name: airconcheck_backend
     env_file:
-      - {{ global_defaults.app_base_path }}/backend/.env
+      - {{ global_defaults.backend_build_context }}/.env
     networks:
       - proxy
       - internal_db
@@ -90,6 +90,10 @@ services:
       - mongodb
     expose:
       - "3000"
+{% if expose_backend_port is defined and expose_backend_port %}
+    ports:
+      - "3000:3000"
+{% endif %}
     restart: unless-stopped
 
   mongodb:

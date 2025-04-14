@@ -1,6 +1,7 @@
 ---
 backend_copy_build: false
 angular_ssr_copy_build: false
+expose_backend_port: true
 swag_external_url: "test.airconcheck.com"
 swag_internal_url: "test.airconcheck.com"
 swag_internal_services:
