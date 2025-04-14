@@ -62,6 +62,7 @@ services:
     restart: unless-stopped
     networks:
       - management
+      - internal_db
       
   angular-ssr:
     build:
