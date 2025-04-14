@@ -1,18 +1,18 @@
+- name: Crear el directori del backend si no existeix
+  file:
+    path: "{{ global_defaults.app_base_path }}/backend"
+    state: directory
+    mode: '0755'
+
 - name: Crear .env per al backend (Express)
   template:
     src: backend.env.j2
     dest: "{{ global_defaults.app_base_path }}/backend/.env"
     mode: "0644"
 
-- name: Assegurar que el directori del backend existeix
-  file:
-    path: "{{ global_defaults.app_base_path }}/backend"
-    state: directory
-    mode: '0755'
-
-# Si vols copiar el codi buildat des d'un altre lloc:
 - name: Copiar build del backend (si no es fa build in-place)
   copy:
-    src: "{{ playbook_dir }}/../backend/"
+    src: "/home/jose/backend/"
     dest: "{{ global_defaults.app_base_path }}/backend/"
     mode: "0755"
+  when: backend_copy_build is defined and backend_copy_build

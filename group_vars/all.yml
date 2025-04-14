@@ -31,6 +31,7 @@ mongodb_version: "7"
 
 # Directory of angular-ssr build context
 angular_ssr_build_context: "/opt/airconcheck/angular-ssr"
+backend_build_context: "/opt/airconcheck/backend"
 
 swag_internal_services:
   - name: portainer

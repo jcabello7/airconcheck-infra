@@ -87,6 +87,42 @@ vim group_vars/secrets.yml
 
 ---
 
+## 📦 Despliegue opcional del frontend y backend
+
+Para facilitar los flujos de trabajo en desarrollo, AirconCheck permite copiar automáticamente el código precompilado del frontend (Angular SSR) y backend (Node.js) al servidor de destino, de forma opcional y controlada por entorno.
+
+Puedes controlar este comportamiento en cada entorno añadiendo las siguientes variables en tu inventario, por ejemplo en `inventories/test/group_vars/test.yml`:
+
+```yaml
+# Copiar el build del frontend Angular SSR al servidor destino
+angular_ssr_copy_build: true
+
+# Copiar el código del backend Node.js al servidor destino
+backend_copy_build: true
+```
+
+### 🧠 ¿Cómo funciona?
+
+- Cuando `angular_ssr_copy_build` está activado (`true`), Ansible copiará el contenido de `dist/` (build de Angular SSR) a:
+  ```
+  /opt/airconcheck/angular-ssr/
+  ```
+
+- Cuando `backend_copy_build` está activado (`true`), Ansible copiará el contenido de tu carpeta local `backend/` a:
+  ```
+  /opt/airconcheck/backend/
+  ```
+
+- Si cualquiera de estas variables no está definida o se pone a `false`, Ansible omitirá el paso de copia — ideal para producción, donde el código ya está desplegado.
+
+Asegúrate de que los directorios fuente existen localmente en la máquina donde se ejecuta Ansible:
+- `dist/` (Angular SSR)
+- `backend/` (Node.js)
+
+Este sistema permite separar entornos y tener despliegues seguros y flexibles.
+
+---
+
 ## 🧑‍💻 Cómo contribuir
 
 - Clona el repositorio y ejecuta `playbooks/debug-vars.yml` para validar el entorno
