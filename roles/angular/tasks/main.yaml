@@ -1,7 +1,8 @@
 - name: Copy angular build
   copy:
     src: dist/
-    dest: "{{ global_defaults.app_base_path }}/frontend/dist/"
+    dest: "{{ global_defaults.angular_ssr_build_context }}"
     owner: jose
     group: jose
     mode: "0755"
+  when: angular_ssr_copy_build is defined and angular_ssr_copy_build
