@@ -131,3 +131,45 @@ This allows easy separation of environments and safe deployment workflows.
 - Stick to naming conventions
 
 Happy hacking!
+
+---
+
+
+## 🚀 Deployed Containers: Backend
+
+The backend is a Node.js Express service used to serve the main API consumed by the Angular frontend.
+
+| Container         | Ports       | Networks                | Notes                                 |
+|------------------|-------------|--------------------------|---------------------------------------|
+| airconcheck_backend | 3000 (only in test) | proxy, internal_db      | Built from `/opt/airconcheck/backend` |
+
+---
+
+## 🌍 URLs per Environment
+
+| Environment | URL                              | Notes                       |
+|-------------|----------------------------------|-----------------------------|
+| Test        | https://api.test.airconcheck.com:8443 | Routed via swag-internal   |
+| Production  | *Not exposed*                    | Backend only used internally |
+
+In the test environment, the backend is also accessible via port `3000` on the host (`localhost:3000`) for debugging if `expose_backend_port: true` is set.
+
+---
+
+## 🔐 Secrets Management
+
+For backend access to MongoDB, ensure the `.env` file at `/opt/airconcheck/backend/.env` includes:
+
+```env
+MONGO_URL=mongodb://<user>:<pass>@mongodb:27017
+```
+
+This can be templated from Ansible using `backend.env.j2` and injected per environment.
+
+---
+
+## 🔗 Docker Network Diagram (including backend)
+
+- `backend` is connected to:
+  - `proxy`: for access from swag-internal
+  - `internal_db`: to communicate with `mongodb`
