@@ -85,7 +85,6 @@ services:
     env_file:
       - {{ global_defaults.backend_build_context }}/.env
     networks:
-      - proxy
       - internal_db
     depends_on:
       - mongodb
