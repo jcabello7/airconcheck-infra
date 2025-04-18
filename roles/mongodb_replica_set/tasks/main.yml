@@ -5,6 +5,9 @@
     state: directory
     mode: '0755'
 
+- debug:
+    var: mongo_root_user
+
 - name: Copy docker-compose template for MongoDB Replica Set
   template:
     src: docker-compose.yml.j2
