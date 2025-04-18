@@ -4,10 +4,12 @@
   become: true
   pre_tasks:
     - name: Load global variables into global_defaults
+      delegate_to: localhost
       include_vars:
         file: "{{ playbook_dir }}/../group_vars/all.yml"
         name: global_defaults
     - name: Load sensitive secrets
+      delegate_to: localhost
       include_vars:
         file: "{{ playbook_dir }}/../group_vars/secrets.yml"
   roles:
