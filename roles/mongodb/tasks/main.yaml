@@ -1,3 +1,0 @@
-# MongoDB will be launched from docker-compose
-- debug:
-    msg: "MongoDB will be launched from docker-compose"

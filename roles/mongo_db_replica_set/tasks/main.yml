@@ -1,0 +1,22 @@
+---
+- name: Ensure MongoDB base directory exists
+  file:
+    path: "{{ airconcheck_base_path }}/mongodb"
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose template for MongoDB Replica Set
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ airconcheck_base_path }}/mongodb/docker-compose.yml"
+
+- name: Pull and up MongoDB replica set
+  community.docker.docker_compose:
+    project_src: "{{ airconcheck_base_path }}/mongodb"
+    state: present
+    restarted: yes
+
+- name: Init replica set
+  include_tasks: init_replica_set.yml
+  # Only run once (if you need to ensure idempotency, might add check)
+  when: inventory_hostname == groups['all'][0]
