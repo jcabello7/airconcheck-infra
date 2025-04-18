@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   mongo1:
-    image: {{ mongo_image }}
+    image: {{ global_defaults.mongo_image }}
     container_name: mongo1
     hostname: mongo1
     environment:
@@ -14,24 +14,24 @@ services:
       - internal_db
 
   mongo2:
-    image: {{ mongo_image }}
+    image: {{ global_defaults.mongo_image }}
     container_name: mongo2
     hostname: mongo2
     environment:
-      MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_username }}
-      MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
+      MONGO_INITDB_ROOT_USERNAME: {{ global_defaults.mongo_root_username }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ global_defaults.mongo_root_password }}
     volumes:
       - mongo2-data:/data/db
     networks:
       - internal_db
 
   mongo3:
-    image: {{ mongo_image }}
+    image: {{ global_defaults.mongo_image }}
     container_name: mongo3
     hostname: mongo3
     environment:
-      MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_username }}
-      MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
+      MONGO_INITDB_ROOT_USERNAME: {{ global_defaults.mongo_root_username }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ global_defaults.mongo_root_password }}
     volumes:
       - mongo3-data:/data/db
     networks:
