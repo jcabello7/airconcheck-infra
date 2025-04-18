@@ -27,7 +27,14 @@ swag_internal_validation: "dns"
 swag_internal_dnsplugin: "cloudflare"
 
 # MongoDB
-mongodb_version: "7"
+mongo_image: 'mongo:8.0.8-noble'
+mongo_replicaset_name: 'rs0'
+
+mongo_express_image: 'mongo-express:1.0.2'
+
+pmm_image: 'percona/pmm-server:2'
+pmm_client_image: 'percona/pmm-client:2'
+pmm_server_container: 'pmm-server'
 
 # Directory of angular-ssr build context
 angular_ssr_build_context: "/opt/airconcheck/angular-ssr"

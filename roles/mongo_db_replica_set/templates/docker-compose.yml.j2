@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  mongo1:
+    image: {{ mongo_image }}
+    container_name: mongo1
+    hostname: mongo1
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_username }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
+    volumes:
+      - mongo1-data:/data/db
+      - ./rs-init.js:/docker-entrypoint-initdb.d/rs-init.js:ro
+    networks:
+      - internal_db
+
+  mongo2:
+    image: {{ mongo_image }}
+    container_name: mongo2
+    hostname: mongo2
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_username }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
+    volumes:
+      - mongo2-data:/data/db
+    networks:
+      - internal_db
+
+  mongo3:
+    image: {{ mongo_image }}
+    container_name: mongo3
+    hostname: mongo3
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_username }}
+      MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
+    volumes:
+      - mongo3-data:/data/db
+    networks:
+      - internal_db
+
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:
+
+networks:
+  internal_db:
+    external: true

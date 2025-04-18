@@ -1,0 +1,17 @@
+---
+- name: Copy docker-compose for Mongo Express
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ airconcheck_base_path }}/mongo_express/docker-compose.yml"
+
+- name: Ensure directory
+  file:
+    path: "{{ airconcheck_base_path }}/mongo_express"
+    state: directory
+    mode: '0755'
+
+- name: Deploy/Restart Mongo Express
+  community.docker.docker_compose:
+    project_src: "{{ airconcheck_base_path }}/mongo_express"
+    state: present
+    restarted: yes

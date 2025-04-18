@@ -15,4 +15,7 @@
     - express
     - docker
     - angular
-    - mongodb
+    - mongodb_replica_set
+    - mongo_express
+#    - pmm
+#    - percona_backup_for_mongodb

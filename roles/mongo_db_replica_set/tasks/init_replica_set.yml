@@ -1,0 +1,48 @@
+---
+- name: Wait for mongo primary to come up
+  wait_for:
+    host: localhost
+    port: 27017
+    delay: 10
+    timeout: 60
+
+- name: Check if replica set is initiated
+  shell: |
+    docker exec mongo1 mongo --quiet --eval \
+      "try { rs.status().ok } catch (e) { print(0) }"
+  register: rs_status
+  changed_when: false
+  failed_when: false
+
+- name: Initiate replica set (if doesn't exist)
+  shell: >
+    docker exec mongo1 mongo --eval
+    'rs.initiate({
+        _id: "{{ mongo_replicaset_name }}",
+        members: [
+          { _id: 0, host: "mongo1:27017" },
+          { _id: 1, host: "mongo2:27017" },
+          { _id: 2, host: "mongo3:27017" }
+        ]
+      })'
+  when: rs_status.stdout.strip() != "1"
+
+- name: Create PMM user (if doesn't exist)
+  shell: >
+    docker exec mongo1 mongo admin --eval
+    'db.getUser("{{ mongo_pmm_user }}")'
+  register: pmm_user
+  changed_when: false
+  failed_when: false
+
+- name: Create PMM user
+  shell: >
+    docker exec mongo1 mongo admin --eval
+    'db.createUser({
+        user:"{{ mongo_pmm_user }}",
+        pwd:"{{ mongo_pmm_password }}",
+        roles:[
+          {role:"clusterMonitor", db:"admin"},
+          {role:"read", db:"local"}
+        ]})'
+  when: pmm_user.stdout == ""
