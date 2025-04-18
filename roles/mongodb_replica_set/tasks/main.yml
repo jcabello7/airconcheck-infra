@@ -1,18 +1,18 @@
 ---
 - name: Ensure MongoDB base directory exists
   file:
-    path: "{{ airconcheck_base_path }}/mongodb"
+    path: "{{ app_base_path }}/mongodb"
     state: directory
     mode: '0755'
 
 - name: Copy docker-compose template for MongoDB Replica Set
   template:
     src: docker-compose.yml.j2
-    dest: "{{ airconcheck_base_path }}/mongodb/docker-compose.yml"
+    dest: "{{ app_base_path }}/mongodb/docker-compose.yml"
 
 - name: Pull and up MongoDB replica set
   community.docker.docker_compose:
-    project_src: "{{ airconcheck_base_path }}/mongodb"
+    project_src: "{{ app_base_path }}/mongodb"
     state: present
     restarted: yes
 
