@@ -2,7 +2,7 @@
 - name: Wait for mongo primary to come up
   shell: |
     docker exec mongo1 \
-      mongo --quiet --eval "db.runCommand({ ping: 1 }).ok"
+      mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok"
   register: mongo_ping
   retries: 30
   delay: 5
