@@ -10,6 +10,10 @@
     - name: Load sensitive secrets
       include_vars:
         file: "{{ playbook_dir }}/../group_vars/secrets.yml"
+    - name: Build MongoDB replica URI
+      set_fact:
+        mongo_rs_uri: >-
+          mongodb://{{ mongo_root_user }}:{{ mongo_root_password | replace('$','$$') }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ mongo_replicaset_name }}&authSource=admin
   roles:
     - ansible_user
     - express
