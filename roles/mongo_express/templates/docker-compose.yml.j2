@@ -7,9 +7,12 @@ services:
       ME_CONFIG_BASICAUTH: "false"
     networks:
       - internal_db
+      - management
     ports:
       - 8081:8081
 
 networks:
   internal_db:
+    external: true
+  management:
     external: true
