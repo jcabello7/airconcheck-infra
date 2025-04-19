@@ -62,36 +62,29 @@
   register: rs_init
   changed_when: '"initiated" in rs_init.stdout'
 
-- name: Wait until mongo1 becomes PRIMARY
+- name: Detect current PRIMARY
   shell: |
     docker exec mongo1 mongosh \
       -u {{ mongo_root_user }} \
       -p '{{ mongo_root_password }}' \
       --authenticationDatabase admin \
-      --quiet --eval '
-        let state = 0;
-        try { state = rs.status().myState } catch (e) { state = 0 }
-        print(state);'
-  register: primary_chk
-  until: primary_chk.stdout.strip() == "1"   # 1 = PRIMARY, 2 = SECONDARY
-  retries: 30        # ~30 × 3 s = 90 s máx
-  delay: 3
+      --quiet --eval 'rs.status().members.filter(m=>m.state===1)[0].name.split(":")[0]'
+  register: primary_cont
   changed_when: false
 
-- name: Create PMM user 
+- name: Create / verify PMM user on PRIMARY
   shell: >-
-    docker exec mongo1 mongosh
-    -u {{ mongo_root_user }}
+    docker exec {{ primary_cont.stdout }}
+    mongosh -u {{ mongo_root_user }}
     -p '{{ mongo_root_password }}'
-    --authenticationDatabase admin
-    --quiet --eval '
+    --authenticationDatabase admin --quiet --eval '
       if (!db.getSiblingDB("admin").getUser("{{ mongo_pmm_user }}")) {
         db.getSiblingDB("admin").createUser({
           user: "{{ mongo_pmm_user }}",
           pwd:  "{{ mongo_pmm_password }}",
-          roles: [
-            { role: "clusterMonitor", db: "admin" },
-            { role: "read",           db: "local" }
+          roles:[
+            {role:"clusterMonitor", db:"admin"},
+            {role:"read",           db:"local"}
           ]
         });
         print("PMM user created");
