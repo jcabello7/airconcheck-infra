@@ -4,13 +4,12 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo1
     hostname: mongo1
-    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /run/secrets/mongo-keyfile"]
-    secrets:
-      - mongo-keyfile
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /etc/mongo-keyfile"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password | replace('$','$$') }}
     volumes:
+      - {{ global_defaults.app_base_path }}/mongodb/keyfile:/etc/mongo-keyfile:ro
       - mongo1-data:/data/db
       - ./rs-init.js:/docker-entrypoint-initdb.d/rs-init.js:ro
     networks:
@@ -20,13 +19,12 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo2
     hostname: mongo2
-    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /run/secrets/mongo-keyfile"]
-    secrets:
-      - mongo-keyfile
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /etc/mongo-keyfile"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password | replace('$','$$') }}
     volumes:
+      - {{ global_defaults.app_base_path }}/mongodb/keyfile:/etc/mongo-keyfile:ro
       - mongo2-data:/data/db
     networks:
       - internal_db
@@ -35,13 +33,12 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo3
     hostname: mongo3
-    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /run/secrets/mongo-keyfile"]
-    secrets:
-      - mongo-keyfile
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /etc/mongo-keyfile"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password | replace('$','$$') }}
     volumes:
+      - {{ global_defaults.app_base_path }}/mongodb/keyfile:/etc/mongo-keyfile:ro
       - mongo3-data:/data/db
     networks:
       - internal_db
