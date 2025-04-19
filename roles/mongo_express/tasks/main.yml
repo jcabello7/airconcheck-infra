@@ -14,4 +14,6 @@
   community.docker.docker_compose:
     project_src: "{{ global_defaults.app_base_path }}/mongo_express"
     state: present
+    recreate: always
+    remove_orphans: true
     restarted: yes
