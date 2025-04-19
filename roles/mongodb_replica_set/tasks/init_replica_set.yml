@@ -62,6 +62,19 @@
   register: rs_init
   changed_when: '"initiated" in rs_init.stdout'
 
+- name: Wait until mongo1 becomes PRIMARY
+  shell: |
+    docker exec mongo1 mongosh \
+      -u {{ mongo_root_user }} \
+      -p '{{ mongo_root_password }}' \
+      --authenticationDatabase admin \
+      --quiet --eval 'isMaster().ismaster'
+  register: ismaster
+  until: ismaster.stdout.strip() == "true"
+  retries: 20          # ~20×3 s = 1 min de margen
+  delay: 3
+  changed_when: false
+
 - name: Create PMM user 
   shell: >-
     docker exec mongo1 mongosh
