@@ -19,7 +19,7 @@
   until: mongo_ping.stdout.strip() == "1"
   changed_when: false
 
-  - name: Wait for mongo3 to come up
+- name: Wait for mongo3 to come up
   shell: |
     docker exec mongo3 \
       mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok"
