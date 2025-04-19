@@ -10,7 +10,8 @@
     content: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters') | trim }}"
     dest: "{{ global_defaults.app_base_path }}/mongodb/keyfile"
     mode: "0400"
-    owner: root
+    owner: "999"
+    group: "999"
   register: keyfile_created
 
 
