@@ -8,6 +8,7 @@
 - name: Ensure keyFile exists
   copy:
     content: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters') }}"
+    newline_sequence: ""
     dest: "{{ global_defaults.app_base_path }}/mongodb/keyfile"
     mode: "0400"
     owner: root
