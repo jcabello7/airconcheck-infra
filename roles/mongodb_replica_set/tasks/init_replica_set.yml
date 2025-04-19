@@ -9,6 +9,26 @@
   until: mongo_ping.stdout.strip() == "1"
   changed_when: false
 
+- name: Wait for mongo2 to come up
+  shell: |
+    docker exec mongo2 \
+      mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok"
+  register: mongo_ping
+  retries: 30
+  delay: 5
+  until: mongo_ping.stdout.strip() == "1"
+  changed_when: false
+
+  - name: Wait for mongo3 to come up
+  shell: |
+    docker exec mongo3 \
+      mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok"
+  register: mongo_ping
+  retries: 30
+  delay: 5
+  until: mongo_ping.stdout.strip() == "1"
+  changed_when: false
+
 - name: Check if replica set is initiated
   shell: |
     docker exec mongo1 mongosh --quiet --eval \
