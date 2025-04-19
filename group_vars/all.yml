@@ -31,6 +31,9 @@ mongo_image: 'mongo:8.0.8-noble'
 mongo_replicaset_name: 'rs0'
 
 mongo_express_image: 'mongo-express:1.0.2'
+mongo_rs_uri: >-
+  mongodb://{{ mongo_root_user }}:{{ mongo_root_password | replace('$','$$') }} @mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ mongo_replicaset_name }}&authSource=admin
+
 
 pmm_image: 'percona/pmm-server:2'
 pmm_client_image: 'percona/pmm-client:2'
