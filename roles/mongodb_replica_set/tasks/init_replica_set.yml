@@ -1,10 +1,13 @@
 ---
 - name: Wait for mongo primary to come up
-  wait_for:
-    host: localhost
-    port: 27017
-    delay: 10
-    timeout: 60
+  shell: |
+    docker exec mongo1 \
+      mongo --quiet --eval "db.runCommand({ ping: 1 }).ok"
+  register: mongo_ping
+  retries: 30
+  delay: 5
+  until: mongo_ping.stdout.strip() == "1"
+  changed_when: false
 
 - name: Check if replica set is initiated
   shell: |
