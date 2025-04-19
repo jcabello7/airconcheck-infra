@@ -68,10 +68,13 @@
       -u {{ mongo_root_user }} \
       -p '{{ mongo_root_password }}' \
       --authenticationDatabase admin \
-      --quiet --eval 'isMaster().ismaster'
-  register: ismaster
-  until: ismaster.stdout.strip() == "true"
-  retries: 20          # ~20×3 s = 1 min de margen
+      --quiet --eval '
+        let state = 0;
+        try { state = rs.status().myState } catch (e) { state = 0 }
+        print(state);'
+  register: primary_chk
+  until: primary_chk.stdout.strip() == "1"   # 1 = PRIMARY, 2 = SECONDARY
+  retries: 30        # ~30 × 3 s = 90 s máx
   delay: 3
   changed_when: false
 
