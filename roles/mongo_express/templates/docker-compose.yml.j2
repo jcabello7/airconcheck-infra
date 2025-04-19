@@ -4,6 +4,7 @@ services:
     container_name: mongo-express
     environment:
       ME_CONFIG_MONGODB_URL: "{{ global_defaults.mongo_rs_uri }}"
+      ME_CONFIG_BASICAUTH: "false"
     networks:
       - internal_db
     ports:
