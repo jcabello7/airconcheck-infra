@@ -23,6 +23,7 @@
   community.docker.docker_compose:
     project_src: "{{ global_defaults.app_base_path }}/mongodb"
     state: present
+    recreate: always
     restarted: yes
 
 - name: Init replica set
