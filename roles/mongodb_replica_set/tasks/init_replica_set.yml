@@ -17,14 +17,16 @@
   changed_when: false
   failed_when: false
 
-- name: Initiate replica set (if doesn't exist)
+- name: Initiate replica set (idempotent)
   shell: |
     docker exec mongo1 mongosh \
       -u {{ mongo_root_user }} \
-      -p {{ mongo_root_password }} \
+      -p '{{ mongo_root_password }}' \
       --authenticationDatabase admin \
       --quiet --eval '
-        if (rs.status().ok !== 1) {
+        let st = 0;
+        try { st = rs.status().ok } catch (e) { st = 0 }
+        if (st !== 1) {
           rs.initiate({
             _id: "{{ global_defaults.mongo_replicaset_name }}",
             members: [
@@ -33,9 +35,12 @@
               { _id: 2, host: "mongo3:27017" }
             ]
           });
+          print("Replica set initiated");
+        } else {
+          print("Replica set already initialized");
         }'
-  register: rs_initiate
-  changed_when: "'ok' not in rs_initiate.stdout"
+  register: rs_init
+  changed_when: '"initiated" in rs_init.stdout'
 
 - name: Create PMM user 
   shell: |
