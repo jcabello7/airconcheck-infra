@@ -35,7 +35,6 @@
     state: present
     recreate: always
     remove_orphans: true
-    restarted: yes
 
 - name: Init replica set
   include_tasks: init_replica_set.yml
