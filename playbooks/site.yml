@@ -12,9 +12,11 @@
         file: "{{ playbook_dir }}/../group_vars/secrets.yml"
     - name: Build MongoDB replica URI
       set_fact:
-        global_defaults:
-          mongo_rs_uri: >-
-            mongodb://{{ mongo_root_user }}:{{ mongo_root_password | replace('$','$$') }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin
+        global_defaults: >-
+          {{ global_defaults | combine({
+            'mongo_rs_uri':
+              "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | replace('$','$$') }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
+          }) }}
   roles:
     - ansible_user
     - express
