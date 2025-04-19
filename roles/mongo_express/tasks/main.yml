@@ -1,14 +1,14 @@
 ---
-- name: Copy docker-compose for Mongo Express
-  template:
-    src: docker-compose.yml.j2
-    dest: "{{ global_defaults.app_base_path }}/mongo_express/docker-compose.yml"
-
 - name: Ensure directory
   file:
     path: "{{ global_defaults.app_base_path }}/mongo_express"
     state: directory
     mode: '0755'
+
+- name: Copy docker-compose for Mongo Express
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ global_defaults.app_base_path }}/mongo_express/docker-compose.yml"
 
 - name: Deploy/Restart Mongo Express
   community.docker.docker_compose:
