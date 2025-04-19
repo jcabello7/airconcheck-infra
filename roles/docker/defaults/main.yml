@@ -5,7 +5,7 @@ docker_networks:
   - name: proxy
     internal: false
   - name: internal_db
-    internal: true
+    internal: false
   - name: management
     internal: false
 
