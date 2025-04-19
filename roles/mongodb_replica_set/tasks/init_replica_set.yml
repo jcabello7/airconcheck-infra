@@ -62,14 +62,17 @@
   register: rs_init
   changed_when: '"initiated" in rs_init.stdout'
 
-- name: Detect current PRIMARY
+- name: Detect current PRIMARY (wait until elected)
   shell: |
     docker exec mongo1 mongosh \
       -u {{ mongo_root_user }} \
       -p '{{ mongo_root_password }}' \
       --authenticationDatabase admin \
-      --quiet --eval 'rs.status().members.filter(m=>m.state===1)[0].name.split(":")[0]'
+      --quiet --eval 'let p=db.adminCommand({hello:1}).primary||"";print(p.split(":")[0]);'
   register: primary_cont
+  until: primary_cont.stdout.strip() != ""
+  retries: 20          # espera hasta ~1 min (20×3 s)
+  delay: 3
   changed_when: false
 
 - name: Create / verify PMM user on PRIMARY
