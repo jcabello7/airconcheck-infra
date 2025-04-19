@@ -66,7 +66,7 @@
   shell: |
     docker exec mongo1 mongosh \
       -u {{ mongo_root_user }} \
-      -p {{ mongo_root_password }} \
+      -p '{{ mongo_root_password }}'' \
       --authenticationDatabase admin \
       --quiet --eval '
         if (!db.getSiblingDB("admin").getUser("{{ mongo_pmm_user }}")) {
