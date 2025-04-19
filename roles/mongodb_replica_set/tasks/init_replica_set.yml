@@ -63,20 +63,24 @@
   changed_when: '"initiated" in rs_init.stdout'
 
 - name: Create PMM user 
-  shell: |
-    docker exec mongo1 mongosh \
-      -u {{ mongo_root_user }} \
-      -p '{{ mongo_root_password }}'' \
-      --authenticationDatabase admin \
-      --quiet --eval '
-        if (!db.getSiblingDB("admin").getUser("{{ mongo_pmm_user }}")) {
-          db.getSiblingDB("admin").createUser({
-            user: "{{ mongo_pmm_user }}",
-            pwd:  "{{ mongo_pmm_password }}",
-            roles: [
-              { role: "clusterMonitor", db: "admin" },
-              { role: "read",           db: "local" }
-            ]
-          });
-        }'
-  changed_when: false
+  shell: >-
+    docker exec mongo1 mongosh
+    -u {{ mongo_root_user }}
+    -p '{{ mongo_root_password }}'
+    --authenticationDatabase admin
+    --quiet --eval '
+      if (!db.getSiblingDB("admin").getUser("{{ mongo_pmm_user }}")) {
+        db.getSiblingDB("admin").createUser({
+          user: "{{ mongo_pmm_user }}",
+          pwd:  "{{ mongo_pmm_password }}",
+          roles: [
+            { role: "clusterMonitor", db: "admin" },
+            { role: "read",           db: "local" }
+          ]
+        });
+        print("PMM user created");
+      } else {
+        print("PMM user already exists");
+      }'
+  register: pmm_user_created
+  changed_when: '"created" in pmm_user_created.stdout'
