@@ -11,7 +11,7 @@
 
 - name: Check if replica set is initiated
   shell: |
-    docker exec mongo1 mongo --quiet --eval \
+    docker exec mongo1 mongosh --quiet --eval \
       "try { rs.status().ok } catch (e) { print(0) }"
   register: rs_status
   changed_when: false
@@ -19,7 +19,7 @@
 
 - name: Initiate replica set (if doesn't exist)
   shell: >
-    docker exec mongo1 mongo --eval
+    docker exec mongo1 mongosh --eval
     'rs.initiate({
         _id: "{{ global_defaults.mongo_replicaset_name }}",
         members: [
@@ -32,7 +32,7 @@
 
 - name: Create PMM user (if doesn't exist)
   shell: >
-    docker exec mongo1 mongo admin --eval
+    docker exec mongo1 mongosh admin --eval
     'db.getUser("{{ mongo_pmm_user }}")'
   register: pmm_user
   changed_when: false
@@ -40,7 +40,7 @@
 
 - name: Create PMM user
   shell: >
-    docker exec mongo1 mongo admin --eval
+    docker exec mongo1 mongosh admin --eval
     'db.createUser({
         user:"{{ mongo_pmm_user }}",
         pwd:"{{ mongo_pmm_password }}",
