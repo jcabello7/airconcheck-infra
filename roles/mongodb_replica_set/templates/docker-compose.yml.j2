@@ -4,7 +4,9 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo1
     hostname: mongo1
-    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all", "--keyFile /run/secrets/mongo-keyfile"]
+    secrets:
+      - mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password | replace('$','$$') }}
@@ -48,3 +50,7 @@ volumes:
 networks:
   internal_db:
     external: true
+
+secrets:
+  mongo-keyfile:
+    file: keyfile       # path in the project
