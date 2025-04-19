@@ -11,7 +11,7 @@
     dest: "{{ global_defaults.app_base_path }}/mongo_express/docker-compose.yml"
 
 - name: Deploy/Restart Mongo Express
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ global_defaults.app_base_path }}/mongo_express"
     state: present
     recreate: always
