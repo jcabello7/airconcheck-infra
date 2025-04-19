@@ -16,3 +16,4 @@
     state: present
     recreate: always
     remove_orphans: true
+    pull: always
