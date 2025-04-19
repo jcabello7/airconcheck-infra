@@ -4,7 +4,7 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo1
     hostname: mongo1
-    command: ["--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
@@ -18,7 +18,7 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo2
     hostname: mongo2
-    command: ["--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
@@ -31,7 +31,7 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo3
     hostname: mongo3
-    command: ["--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
+    command: ["mongod", "--replSet", "{{ global_defaults.mongo_replicaset_name }}", "--bind_ip_all"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: {{ mongo_root_user }}
       MONGO_INITDB_ROOT_PASSWORD: {{ mongo_root_password }}
