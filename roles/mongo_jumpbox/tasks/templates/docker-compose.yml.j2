@@ -5,6 +5,7 @@ services:
     command: sleep infinity
     networks:
       - internal_db
+      - external_net
     volumes:
       - /etc/localtime:/etc/localtime:ro
     build:
@@ -14,5 +15,5 @@ services:
 networks:
   internal_db:
     external: true
-  bridge:
-    external: true
+  external_net:
+    driver: bridge
