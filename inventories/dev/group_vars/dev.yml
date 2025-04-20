@@ -1,9 +1,9 @@
 ---
 # Copy backend files from Anisble to the server
-backend_copy_build: true
+backend_copy_build: false
 
 # Copy angular-ssr files from Anisble to the server
-angular_ssr_copy_build: true
+angular_ssr_copy_build: false
 
 # Expose backend port at host
 expose_backend_port: false
