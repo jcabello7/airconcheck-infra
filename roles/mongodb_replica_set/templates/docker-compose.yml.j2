@@ -19,6 +19,8 @@ services:
       - ./rs-init.js:/docker-entrypoint-initdb.d/rs-init.js:ro
     networks:
       - internal_db
+    ports:
+      - "27017:27017"
 
   mongo2:
     image: {{ global_defaults.mongo_image }}
@@ -39,6 +41,8 @@ services:
       - mongo2-data:/data/db
     networks:
       - internal_db
+    ports:
+      - "27018:27017"
 
   mongo3:
     image: {{ global_defaults.mongo_image }}
@@ -59,6 +63,8 @@ services:
       - mongo3-data:/data/db
     networks:
       - internal_db
+    ports:
+      - "27019:27017"
 
 volumes:
   mongo1-data:
