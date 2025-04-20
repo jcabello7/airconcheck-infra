@@ -96,3 +96,21 @@
       }'
   register: pmm_user_created
   changed_when: '"created" in pmm_user_created.stdout'
+
+- name: Create MongoDB app user (if not exists)
+  shell: |
+    docker exec mongo-jumpbox mongosh "{{ global_defaults.mongo_rs_uri }}" --quiet --eval '
+      if (!db.getMongo().getDB("{{ mongo_app_db }}").getUser("{{ mongo_app_user }}")) {
+        db.getMongo().getDB("{{ mongo_app_db }}").createUser({
+          user: "{{ mongo_app_user }}",
+          pwd: "{{ mongo_app_password }}",
+          roles: [ { role: "readWrite", db: "{{ mongo_app_db }}" } ]
+        });
+        print("App user created");
+      } else {
+        print("App user already exists");
+      }
+    '
+  register: create_app_user
+  changed_when: "'App user created' in create_app_user.stdout"
+  no_log: true
