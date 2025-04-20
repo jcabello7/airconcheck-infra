@@ -6,4 +6,4 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add -
     && apt-get install -y mongodb-mongosh mongodb-database-tools \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-ENTRYPOINT ["/bin/bash"]
+CMD ["bash"]
