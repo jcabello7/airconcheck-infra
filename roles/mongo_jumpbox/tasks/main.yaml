@@ -20,6 +20,7 @@
     state: present
     recreate: always
     remove_orphans: true
+    build: always
 
 - name: Disconnect mongo-jumpbox from external_net network
   command: docker network disconnect external_net mongo-jumpbox
