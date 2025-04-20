@@ -9,6 +9,11 @@
     src: docker-compose.yml.j2
     dest: "{{ global_defaults.app_base_path }}/mongo_jumpbox/docker-compose.yml"
 
+- name: Copy Dockerfile for mongo-jumpbox
+  copy:
+    src: Dockerfile
+    dest: "{{ global_defaults.app_base_path }}/mongo_jumpbox/Dockerfile"
+
 - name: Deploy MongoDB Jumpbox container
   community.docker.docker_compose_v2:
     project_src: "{{ global_defaults.app_base_path }}/mongo_jumpbox"
@@ -16,6 +21,6 @@
     recreate: always
     remove_orphans: true
 
-# - name: Disconnect mongo-jumpbox from default network
-#   command: docker network disconnect default mongo-jumpbox
-#   ignore_errors: true
+- name: Disconnect mongo-jumpbox from external_net network
+  command: docker network disconnect external_net mongo-jumpbox
+  ignore_errors: true
