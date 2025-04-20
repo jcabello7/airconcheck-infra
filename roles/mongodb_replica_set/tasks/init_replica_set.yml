@@ -113,4 +113,4 @@
     '
   register: create_app_user
   changed_when: "'App user created' in create_app_user.stdout"
-  no_log: true
+  no_log: false
