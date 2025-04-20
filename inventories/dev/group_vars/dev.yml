@@ -1,0 +1,21 @@
+---
+# Copy backend files from Anisble to the server
+backend_copy_build: true
+
+# Copy angular-ssr files from Anisble to the server
+angular_ssr_copy_build: true
+
+# Expose backend port at host
+expose_backend_port: false
+
+# Expose backend to the SWAG-internal proxy
+deploy_backend: true
+
+# Base domain URLs
+swag_external_url: "dev.airconcheck.com"
+swag_internal_url: "dev.airconcheck.com"
+
+# Internal SWAG exposed services
+swag_internal_services:
+  - name: portainer
+    port: 9000
