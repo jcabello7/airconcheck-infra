@@ -45,5 +45,5 @@ swag_internal_services:
     port: 9000
   - name: airconcheck_backend
     port: 3000
-  - name: mongoexpress
+  - name: mongo-express
     port: 8081
