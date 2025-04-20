@@ -30,8 +30,8 @@
     - express
     - docker
     - angular
+    - mongo_jumpbox
     - mongodb_replica_set
     - mongo_express
-    - mongo_jumpbox
 #    - pmm
 #    - percona_backup_for_mongodb
