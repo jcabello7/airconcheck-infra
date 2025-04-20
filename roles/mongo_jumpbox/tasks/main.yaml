@@ -15,3 +15,7 @@
     state: present
     recreate: always
     remove_orphans: true
+
+- name: Disconnect mongo-jumpbox from default network
+  command: docker network disconnect default mongo-jumpbox
+  ignore_errors: true
