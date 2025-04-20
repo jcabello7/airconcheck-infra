@@ -1,0 +1,18 @@
+services:
+  mongo-jumpbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mongo-jumpbox
+    tty: true
+    stdin_open: true
+    command: bash
+    networks:
+      - internal_db
+      - external_net
+
+networks:
+  internal_db:
+    external: true
+  external_net:
+    driver: bridge
