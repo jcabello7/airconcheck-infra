@@ -1,11 +1,13 @@
 networks:
   proxy:
-    driver: bridge
+    external: true
+    name: proxy
   internal_db:
-    driver: bridge
-    internal: false
+    external: true
+    name: internal_db
   management:
-    driver: bridge
+    external: true
+    name: management
 
 services:
   portainer:
