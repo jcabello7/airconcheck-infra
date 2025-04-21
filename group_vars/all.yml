@@ -7,6 +7,7 @@ puid: "996"
 pgid: "988"
 timezone: "Europe/Madrid"
 app_base_path: "/opt/airconcheck"
+deployment_env: prod
 
 # Portainer
 portainer_version: "2.27.1"
