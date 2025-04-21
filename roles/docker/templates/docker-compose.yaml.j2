@@ -95,7 +95,7 @@ services:
     networks:
       - internal_db
     environment:
-      MONGO_URL: "mongodb://root:${MONGO_ROOT_PASSWORD}@mongo1:27017/?replicaSet=rs0"
+      MONGO_URL: "{{ mongo_app_url }}"
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('mongodb').MongoClient.connect(process.env.MONGO_URL).then(()=>process.exit(0)).catch(()=>process.exit(1))\""]
       interval: 10s
