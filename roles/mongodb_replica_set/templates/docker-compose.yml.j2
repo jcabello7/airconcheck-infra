@@ -85,5 +85,11 @@ volumes:
 
 networks:
   internal_db:
-    internal: {% if deployment_env != 'dev' %}true{% else %}false{% endif %}
+    {% if deployment_env == "dev" %}
+    internal: false
     name: internal_db
+    external: true
+    {% else %}
+    driver: bridge
+    internal: true
+    {% endif %}
