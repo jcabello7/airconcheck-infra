@@ -2,7 +2,7 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
 
-    server_name api.{{ swag_internal_url }};
+    server_name backend.{{ swag_internal_url }};
 
     include /config/nginx/ssl.conf;
 

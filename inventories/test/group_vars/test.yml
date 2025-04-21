@@ -11,7 +11,7 @@ angular_ssr_copy_build: false
 expose_backend_port: false
 
 # Expose backend to the SWAG-internal proxy
-deploy_backend: true
+deploy_backend: false
 
 # Base domain URLs
 swag_external_url: "test.airconcheck.com"

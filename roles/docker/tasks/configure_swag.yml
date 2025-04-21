@@ -23,6 +23,12 @@
     src: swag-site-confs/backend.subdomain.conf.j2
     dest: "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs/backend.subdomain.conf"
   when: deploy_backend is defined and deploy_backend
+
+- name: Eliminar configuració SWAG INTERNAL específica per backend si no s'ha de desplegar
+  file:
+    path: "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs/backend.subdomain.conf"
+    state: absent
+  when: deploy_backend is not defined or not deploy_backend
     
 - name: Generar dns-conf.ini para SWAG EXTERNAL
   template:
