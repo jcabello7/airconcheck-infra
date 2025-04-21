@@ -1,4 +1,6 @@
 ---
+deployment_env: test
+
 # Copy backend files from Anisble to the server
 backend_copy_build: false
 

@@ -10,6 +10,9 @@
     - name: Load sensitive secrets
       include_vars:
         file: "{{ playbook_dir }}/../group_vars/secrets.yml"
+    - name: Set mongo_app_url based on environment
+      set_fact:
+        mongo_app_url: "{{ mongo_app_url_dev if deployment_env == 'dev' else mongo_app_url }}"
     - name: Build MongoDB replica URI
       set_fact:
         global_defaults: "{{ global_defaults | combine({
