@@ -2,16 +2,15 @@ networks:
   proxy:
     external: true
     name: proxy
-    internal_db:
-      {% set dev = (deployment_env == "dev") %}
-      {% if dev %}
-      internal: false
-      name: internal_db
-      external: true
-      {% else %}
-      driver: bridge
-      internal: true
-      {% endif %}
+  internal_db:
+{% if deployment_env == "dev" %}
+    internal: false
+    name: internal_db
+    external: true
+{% else %}
+    driver: bridge
+    internal: true
+{% endif %}
   management:
     external: true
     name: management
