@@ -3,7 +3,7 @@ networks:
     external: true
     name: proxy
   internal_db:
-    external: true
+    internal: {% if deployment_env != 'dev' %}true{% else %}false{% endif %}
     name: internal_db
   management:
     external: true
