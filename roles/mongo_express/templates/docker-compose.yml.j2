@@ -14,9 +14,9 @@ services:
 networks:
   internal_db:
     name: internal_db
-{% if deployment_env == "dev" %}
-    internal: false
     external: true
+{% if deployment_env == "dev" %}
+    internal: false    
 {% else %}
     driver: bridge
     internal: true
