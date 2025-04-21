@@ -21,10 +21,10 @@ services:
       - internal_db
     expose:
       - 27017
+{% if deployment_env == "dev" %}
     ports:
-      {% if deployment_env == "dev" %}
       - "27017:27017"
-      {% endif %}
+{% endif %}
 
   mongo2:
     image: {{ global_defaults.mongo_image }}
@@ -47,10 +47,10 @@ services:
       - internal_db
     expose:
       - 27017
-      ports:
-      {% if deployment_env == "dev" %}
+{% if deployment_env == "dev" %}
+    ports:
       - "27018:27017"
-      {% endif %}
+{% endif %}
 
   mongo3:
     image: {{ global_defaults.mongo_image }}
@@ -73,10 +73,10 @@ services:
       - internal_db
     expose:
       - 27017
-      ports:
-      {% if deployment_env == "dev" %}
+{% if deployment_env == "dev" %}
+    ports:
       - "27019:27017"
-      {% endif %}
+{% endif %}
 
 volumes:
   mongo1-data:
