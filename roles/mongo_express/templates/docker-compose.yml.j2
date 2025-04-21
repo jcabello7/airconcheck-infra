@@ -13,15 +13,14 @@ services:
 
 networks:
   internal_db:
-    {% set dev = (deployment_env == "dev") %}
-    {% if dev %}
+{% if deployment_env == "dev" %}
     internal: false
     name: internal_db
     external: true
-    {% else %}
+{% else %}
     driver: bridge
     internal: true
-    {% endif %}
+{% endif %}
   management:
     external: true
     name: management
