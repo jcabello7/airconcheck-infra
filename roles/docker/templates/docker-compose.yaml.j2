@@ -89,7 +89,7 @@ services:
     build:
       context: {{ global_defaults.backend_build_context | default('../backend') }}
       dockerfile: Dockerfile
-    container_name: airconcheck_backend
+    container_name: backend
     env_file:
       - {{ global_defaults.backend_build_context }}/.env
     networks:
