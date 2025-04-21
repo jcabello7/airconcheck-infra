@@ -3,9 +3,9 @@ networks:
     external: true
     name: proxy
   internal_db:
+    name: internal_db
 {% if deployment_env == "dev" %}
     internal: false
-    name: internal_db
     external: true
 {% else %}
     driver: bridge
