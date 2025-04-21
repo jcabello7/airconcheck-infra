@@ -85,7 +85,8 @@ volumes:
 
 networks:
   internal_db:
-    {% if deployment_env == "dev" %}
+    {% set dev = (deployment_env == "dev") %}
+    {% if dev %}
     internal: false
     name: internal_db
     external: true
