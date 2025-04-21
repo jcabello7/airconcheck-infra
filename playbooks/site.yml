@@ -52,3 +52,26 @@
     - mongo_express
 #    - pmm
 #    - percona_backup_for_mongodb
+
+  post_tasks:
+    - name: Reconfigure replica set with public hostnames (only in dev)
+      when: deployment_env == 'dev'
+      block:
+        - name: Wait for mongo-jumpbox container to be ready
+          shell: docker exec mongo-jumpbox ls /
+          register: jumpbox_ready
+          retries: 5
+          delay: 5
+          until: jumpbox_ready.rc == 0
+
+        - name: Reconfigure MongoDB replica set to use public hostnames
+          shell: >-
+            docker exec mongo-jumpbox mongosh
+            "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | urlencode }}@mongo1:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
+            --quiet --eval '
+              cfg = rs.conf();
+              cfg.members[0].host = "dev.airconcheck.com:27017";
+              cfg.members[1].host = "dev.airconcheck.com:27018";
+              cfg.members[2].host = "dev.airconcheck.com:27019";
+              rs.reconfig(cfg, {force: true});
+            '
