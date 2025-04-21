@@ -15,7 +15,7 @@
         mongo_app_url: "{{ mongo_app_url_dev if deployment_env == 'dev' else mongo_app_url }}"
     - name: Adjust docker_networks if in dev environment
       set_fact:
-        docker_networks: "{{ adjusted_docker_networks }}"
+        docker_networks: "{{ adjusted_docker_networks | from_yaml }}"
       vars:
         adjusted_docker_networks: >-
           {% set result = [] %}
