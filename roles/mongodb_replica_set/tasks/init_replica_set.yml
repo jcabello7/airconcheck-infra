@@ -62,22 +62,36 @@
   register: rs_init
   changed_when: '"initiated" in rs_init.stdout'
 
-- name: Detect current PRIMARY (wait until elected)
+- name: Detect current PRIMARY host
   shell: |
     docker exec mongo1 mongosh \
       -u {{ mongo_root_user }} \
       -p '{{ mongo_root_password }}' \
       --authenticationDatabase admin \
-      --quiet --eval 'let p=db.adminCommand({hello:1}).primary||"";print(p.split(":")[0]);'
-  register: primary_cont
-  until: primary_cont.stdout.strip() != ""
-  retries: 20          # espera hasta ~1 min (20×3 s)
+      --quiet --eval 'db.adminCommand({hello:1}).primary'
+  register: primary_host
+  until: primary_host.stdout.strip() != ""
+  retries: 20
   delay: 3
   changed_when: false
 
+- name: Map PRIMARY host to container name
+  set_fact:
+    primary_container_name: >-
+      {{
+        {
+          'mongo1:27017': 'mongo1',
+          'mongo2:27017': 'mongo2',
+          'mongo3:27017': 'mongo3',
+          'dev.airconcheck.com:27017': 'mongo1',
+          'dev.airconcheck.com:27018': 'mongo2',
+          'dev.airconcheck.com:27019': 'mongo3'
+        }[primary_host.stdout.strip()]
+      }}
+
 - name: Create / verify PMM user on PRIMARY
   shell: >-
-    docker exec {{ primary_cont.stdout }}
+    docker exec {{ primary_container_name }}
     mongosh -u {{ mongo_root_user }}
     -p '{{ mongo_root_password }}'
     --authenticationDatabase admin --quiet --eval '
