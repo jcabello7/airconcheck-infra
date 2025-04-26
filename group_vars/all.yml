@@ -37,6 +37,9 @@ pmm_image: 'percona/pmm-server:2'
 pmm_client_image: 'percona/pmm-client:2'
 pmm_server_container: 'pmm-server'
 
+# Backend
+backend_api_path: "/api/v1/airconcheck"
+
 # Directory of angular-ssr build context
 angular_ssr_build_context: "/opt/airconcheck/angular-ssr"
 backend_build_context: "/opt/airconcheck/backend"

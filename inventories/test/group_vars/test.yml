@@ -17,6 +17,9 @@ deploy_backend: false
 swag_external_url: "test.airconcheck.com"
 swag_internal_url: "test.airconcheck.com"
 
+# Backend
+backend_api_host: "http://backend:3000"
+
 # Internal SWAG exposed services
 swag_internal_services:
   - name: portainer
