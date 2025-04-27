@@ -10,6 +10,7 @@ services:
     networks:
       - internal_db
       - external_net
+    restart: unless-stopped
 
 networks:
   internal_db:

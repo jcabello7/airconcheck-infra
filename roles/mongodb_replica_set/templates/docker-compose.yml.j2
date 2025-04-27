@@ -21,6 +21,7 @@ services:
       - internal_db
     expose:
       - 27017
+    restart: unless-stopped
 {% if deployment_env == "dev" %}
     ports:
       - "27017:27017"
@@ -47,6 +48,7 @@ services:
       - internal_db
     expose:
       - 27017
+    restart: unless-stopped
 {% if deployment_env == "dev" %}
     ports:
       - "27018:27017"
@@ -73,6 +75,7 @@ services:
       - internal_db
     expose:
       - 27017
+    restart: unless-stopped
 {% if deployment_env == "dev" %}
     ports:
       - "27019:27017"
