@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  {{ docker_proxy_container_name }}:
+    image: {{ docker_proxy_image }}
+    container_name: {{ docker_proxy_container_name }}
+    networks:
+      - management
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+{% for key, value in docker_proxy_env.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+    restart: unless-stopped
+networks:
+  management:
+    external: true
