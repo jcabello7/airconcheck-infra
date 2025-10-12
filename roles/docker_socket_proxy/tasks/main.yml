@@ -2,8 +2,8 @@
   file:
     path: "{{ global_defaults.docker_proxy_compose_path }}"
     state: directory
-    owner: "{{ global_defaults.dockeruser_puid }}"
-    group: "{{ global_defaults.dockeruser_pgid }}"
+    owner: "{{ global_defaults.puid }}"
+    group: "{{ global_defaults.pgid }}"
     mode: '0755'
 
 - name: Template docker-compose.yml
