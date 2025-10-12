@@ -1,17 +1,17 @@
 - name: Ensure compose directory exists
   file:
-    path: "{{ docker_proxy_compose_path }}"
+    path: "{{ global_defaults.docker_proxy_compose_path }}"
     state: directory
-    owner: "{{ dockeruser_puid }}"
-    group: "{{ dockeruser_pgid }}"
+    owner: "{{ global_defaults.dockeruser_puid }}"
+    group: "{{ global_defaults.dockeruser_pgid }}"
     mode: '0755'
 
 - name: Template docker-compose.yml
   template:
     src: docker-compose.yml.j2
-    dest: "{{ docker_proxy_compose_path }}/docker-compose.yml"
+    dest: "{{ global_defaults.docker_proxy_compose_path }}/docker-compose.yml"
 
 - name: Run docker compose
   command: docker compose up -d
   args:
-    chdir: "{{ docker_proxy_compose_path }}"
+    chdir: "{{ global_defaults.docker_proxy_compose_path }}"

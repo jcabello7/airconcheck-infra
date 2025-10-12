@@ -2,20 +2,20 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ dockeruser_puid }}"
-    group: "{{ dockeruser_pgid }}"
+    owner: "{{ global_defaults.dockeruser_puid }}"
+    group: "{{ global_defaults.dockeruser_pgid }}"
     mode: '0755'
   loop:
-    - "{{ homepage_config_path }}"
-    - "{{ homepage_compose_path }}"
+    - "{{ global_defaults.homepage_config_path }}"
+    - "{{ global_defaults.homepage_compose_path }}"
 
 - name: Template docker-compose.yml
   template:
     src: docker-compose.yml.j2
-    dest: "{{ homepage_compose_path }}/docker-compose.yml"
+    dest: "{{ global_defaults.homepage_compose_path }}/docker-compose.yml"
 
 
 - name: Run docker compose
   command: docker compose up -d
   args:
-    chdir: "{{ homepage_compose_path }}"
+    chdir: "{{ global_defaults.homepage_compose_path }}"

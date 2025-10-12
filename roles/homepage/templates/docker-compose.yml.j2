@@ -1,19 +1,19 @@
 # roles/homepage/templates/docker-compose.yml.j2
 version: '3.8'
 services:
-  {{ homepage_container_name }}:
-    image: {{ homepage_image }}
-    container_name: {{ homepage_container_name }}
+  {{ global_defaults.homepage_container_name }}:
+    image: {{ global_defaults.homepage_image }}
+    container_name: {{ global_defaults.homepage_container_name }}
     networks:
       - proxy
       - management
     volumes:
-      - {{ homepage_config_path }}:/app/config
+      - {{ global_defaults.homepage_config_path }}:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: {{ homepage_allowed_hosts }}
-      PUID: {{ dockeruser_puid }}
-      PGID: {{ dockeruser_pgid }}
+      HOMEPAGE_ALLOWED_HOSTS: {{ global_defaults.homepage_allowed_hosts }}
+      PUID: {{ global_defaults.dockeruser_puid }}
+      PGID: {{ global_defaults.dockeruser_pgid }}
     restart: unless-stopped
 networks:
   proxy:

@@ -1,8 +1,8 @@
 version: '3.8'
 services:
-  {{ docker_proxy_container_name }}:
-    image: {{ docker_proxy_image }}
-    container_name: {{ docker_proxy_container_name }}
+  {{ global_defaults.docker_proxy_container_name }}:
+    image: {{ global_defaults.docker_proxy_image }}
+    container_name: {{ global_defaults.docker_proxy_container_name }}
     networks:
       - management
     volumes:
