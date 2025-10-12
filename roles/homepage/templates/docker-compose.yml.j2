@@ -11,12 +11,13 @@ services:
       - {{ global_defaults.homepage_config_path }}:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: {{ global_defaults.homepage_allowed_hosts }}
-      PUID: {{ global_defaults.dockeruser_puid }}
-      PGID: {{ global_defaults.dockeruser_pgid }}
+      HOMEPAGE_ALLOWED_HOSTS: {{ homepage_allowed_hosts }}
+      PUID: {{ global_defaults.puid }}
+      PGID: {{ global_defaults.pgid }}
     restart: unless-stopped
 networks:
   proxy:
     external: true
   management:
     external: true
+  

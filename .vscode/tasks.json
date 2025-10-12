@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Ansible: site (dev)",
+      "type": "shell",
+      "command": "ansible-playbook -i inventories/dev/hosts playbooks/site.yml",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Ansible: docker_socket_proxy (dev)",
+      "type": "shell",
+      "command": "ansible-playbook -i inventories/dev/hosts playbooks/site.yml -t docker_socket_proxy -vv",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

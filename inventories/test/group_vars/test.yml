@@ -21,7 +21,7 @@ swag_internal_url: "test.airconcheck.com"
 backend_api_host: "http://backend:3000"
 
 # Homepage
-homepage_allowed_hosts: "homepage.test.airconcheck.com:8443"
+homepage_allowed_hosts: "homepage.test.airconcheck.com"
 
 # Internal SWAG exposed services
 swag_internal_services:
