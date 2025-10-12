@@ -7,10 +7,13 @@ services:
       - management
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+{% set env = global_defaults.docker_proxy_env | default({}) %}
+{% if env %}
     environment:
-{% for key, value in docker_proxy_env.items() %}
+{% for key, value in env.items() %}
       {{ key }}: "{{ value }}"
 {% endfor %}
+{% endif %}
     restart: unless-stopped
 networks:
   management:
