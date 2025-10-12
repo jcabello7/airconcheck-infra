@@ -1,0 +1,23 @@
+---
+- name: Ensure config directory exists
+  file:
+    path: "{{ homepage_config_path }}"
+    state: directory
+    owner: "{{ global_defaults.puid }}"
+    group: "{{ global_defaults.pgid }}"
+    mode: '0755'
+
+- name: Deploy Homepage container
+  community.docker.docker_container:
+    name: "{{ global_defaults.homepage_container_name }}"
+    image: "{{ global_defaults.homepage_image }}"
+    networks:
+      - name: management
+    volumes:
+      - "{{ homepage_config_path }}:/app/config"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    env:
+      HOMEPAGE_ALLOWED_HOSTS: "{{ homepage_allowed_hosts }}"
+      PUID: "{{ global_defaults.puid }}"
+      PGID: "{{ global_defaults.pgid }}"
+    restart_policy: unless-stopped

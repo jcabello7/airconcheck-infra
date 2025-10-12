@@ -1,0 +1,9 @@
+---
+docker_proxy_container_name: docker-socket-proxy  # default value for the container name
+docker_proxy_env:
+  CONTAINERS: 1
+  SERVICES: 0
+  TASKS: 0
+  EVENTS: 0
+  NETWORKS: 0
+  INFO: 0

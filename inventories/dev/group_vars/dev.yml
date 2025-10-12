@@ -20,6 +20,9 @@ swag_internal_url: "dev.airconcheck.com"
 # Backend
 backend_api_host: "https://backend.dev.airconcheck.com:8443"
 
+# Homepage
+homepage_allowed_hosts: "homepage.dev.airconcheck.com:8443"
+
 # Internal SWAG exposed services
 swag_internal_services:
   - name: portainer
