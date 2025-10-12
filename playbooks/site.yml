@@ -50,6 +50,8 @@
     - mongo_jumpbox
     - mongodb_replica_set
     - mongo_express
+    - docker_socket_proxy
+    - homepage
 #    - pmm
 #    - percona_backup_for_mongodb
 
