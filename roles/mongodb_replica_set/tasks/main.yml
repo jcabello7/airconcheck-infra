@@ -5,14 +5,26 @@
     state: directory
     mode: '0755'
 
-- name: Ensure keyFile exists
+- name: Check if MongoDB keyFile exists
+  stat:
+    path: "{{ global_defaults.app_base_path }}/mongodb/keyfile"
+  register: keyfile_stat
+
+- name: Create MongoDB keyFile (once)
   copy:
     content: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters') | trim }}"
     dest: "{{ global_defaults.app_base_path }}/mongodb/keyfile"
     mode: "0400"
     owner: "999"
     group: "999"
-  register: keyfile_created
+  when: not keyfile_stat.stat.exists | default(false)
+
+- name: Ensure MongoDB keyFile ownership and mode
+  file:
+    path: "{{ global_defaults.app_base_path }}/mongodb/keyfile"
+    owner: "999"
+    group: "999"
+    mode: "0400"
 
 
 - name: Copy docker-compose template for MongoDB Replica Set

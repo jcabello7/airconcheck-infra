@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  coredns:
+    image: "{{ coredns_image }}"
+    container_name: coredns
+    command:
+      - -conf
+      - /etc/coredns/Corefile
+    volumes:
+      - "{{ coredns_compose_path }}/Corefile:/etc/coredns/Corefile:ro"
+{% for z in coredns_zones %}
+{%   if z.wildcard_to is not defined %}
+      - "{{ coredns_compose_path }}/zone_{{ z.zone }}.db:/etc/coredns/zone_{{ z.zone }}.db:ro"
+{%   endif %}
+{% endfor %}
+    ports:
+      - "{{ coredns_bind_ip_effective }}:53:53/udp"
+      - "{{ coredns_bind_ip_effective }}:53:53/tcp"
+    restart: unless-stopped

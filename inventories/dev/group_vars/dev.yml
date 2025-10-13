@@ -27,3 +27,18 @@ homepage_allowed_hosts: "homepage.dev.airconcheck.com"
 swag_internal_services:
   - name: portainer
     port: 9000
+
+# CoreDNS enabled by default in dev
+coredns_enabled: true
+coredns_zones:
+  - zone: dev.airconcheck.com
+    records:
+      - type: A
+        name: '@'
+        value: TAILSCALE_SELF
+      - type: A
+        name: '*'
+        value: TAILSCALE_SELF
+
+# Reconfigurar RS a DNS públicos (dev) en dos fases
+mongodb_public_member_dns: true

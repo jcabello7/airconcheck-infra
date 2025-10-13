@@ -1,0 +1,36 @@
+{
+  errors
+  health
+  ready
+}
+
+{% for z in coredns_zones %}
+{{ z.zone }}:53 {
+  {% if z.wildcard_to is defined %}
+  # Mode 2: wildcard synthesizer + forward rest
+  template IN A *.{{ z.zone }} {
+    answer "{{'{{'}}.Name{{'}}'}} 300 IN A {{ (z.wildcard_to == 'TAILSCALE_SELF') | ternary(coredns_bind_ip_effective, z.wildcard_to) }}"
+  }
+  {% set fwd = (coredns_forwarders | default([])) %}
+  {% if fwd | length > 0 %}
+  forward . {{ fwd | join(' ') }}
+  {% else %}
+  forward . /etc/resolv.conf
+  {% endif %}
+  {% else %}
+  # Mode 1: file-based authoritative zone
+  file /etc/coredns/zone_{{ z.zone }}.db
+  {% endif %}
+}
+{% endfor %}
+
+{% set fwd = (coredns_forwarders | default([])) %}
+. {
+  {% if fwd | length > 0 %}
+  forward . {{ fwd | join(' ') }}
+  {% else %}
+  forward . /etc/resolv.conf
+  {% endif %}
+  cache 300
+  reload
+}

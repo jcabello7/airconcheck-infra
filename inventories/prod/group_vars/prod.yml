@@ -1,5 +1,5 @@
 ---
-deployment_env: test
+deployment_env: prod
 
 # Copy backend files from Anisble to the server
 backend_copy_build: false
@@ -14,28 +14,23 @@ expose_backend_port: false
 deploy_backend: false
 
 # Base domain URLs
-swag_external_url: "test.airconcheck.com"
-swag_internal_url: "test.airconcheck.com"
+swag_external_url: "airconcheck.com"
+swag_internal_url: "airconcheck.com"
 
-# Backend
+# Backend (not exposed in prod)
 backend_api_host: "http://backend:3000"
 
 # Homepage
-homepage_allowed_hosts: "homepage.test.airconcheck.com"
+homepage_allowed_hosts: "homepage.airconcheck.com"
 
 # Internal SWAG exposed services
 swag_internal_services:
   - name: portainer
     port: 9000
 
-# CoreDNS enabled by default in test
+# CoreDNS enabled por defecto en prod
+# Modo: wildcard synth para *.airconcheck.com hacia Tailscale y forward del resto (apex via Internet)
 coredns_enabled: true
 coredns_zones:
-  - zone: test.airconcheck.com
-    records:
-      - type: A
-        name: '@'
-        value: TAILSCALE_SELF
-      - type: A
-        name: '*'
-        value: TAILSCALE_SELF
+  - zone: airconcheck.com
+    wildcard_to: TAILSCALE_SELF

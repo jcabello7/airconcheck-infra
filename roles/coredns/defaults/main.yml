@@ -1,0 +1,33 @@
+---
+# Enable/disable CoreDNS role per environment
+coredns_enabled: false
+
+# Image and paths
+coredns_image: 'coredns/coredns:1.11.1'
+coredns_compose_path: '{{ global_defaults.app_base_path }}/coredns'
+
+# Bind IP for DNS (tailscale0 autodetect if empty)
+coredns_bind_ip: ''
+
+# Default forwarders for non-authoritative queries
+coredns_forwarders:
+  - 1.1.1.1
+  - 9.9.9.9
+
+# Zones to serve. Example:
+# coredns_zones:
+#   - zone: dev.airconcheck.com
+#     # Mode 1: authoritative file-based zone with explicit records
+#     records:
+#       - type: A
+#         name: '@'            # apex
+#         value: TAILSCALE_SELF
+#       - type: A
+#         name: '*'
+#         value: TAILSCALE_SELF
+#
+#   - zone: airconcheck.com
+#     # Mode 2: wildcard synth + forward the rest (apex via Internet)
+#     wildcard_to: TAILSCALE_SELF  # or an explicit IP
+#     # All other names in this zone are forwarded to upstream resolvers
+coredns_zones: []

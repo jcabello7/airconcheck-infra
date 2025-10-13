@@ -46,6 +46,7 @@
     - ansible_user
     - express
     - docker
+    - { role: coredns, when: coredns_enabled | default(false) }
     - angular
     - mongo_jumpbox
     - mongodb_replica_set
@@ -56,8 +57,8 @@
 #    - percona_backup_for_mongodb
 
   post_tasks:
-    - name: Reconfigure replica set with public hostnames (only in dev)
-      when: deployment_env == 'dev'
+    - name: Reconfigure replica set with public hostnames (only in dev, opt-in)
+      when: deployment_env == 'dev' and (mongodb_public_member_dns | default(false))
       block:
         - name: Wait for mongo-jumpbox container to be ready
           shell: docker exec mongo-jumpbox ls /
@@ -66,14 +67,88 @@
           delay: 5
           until: jumpbox_ready.rc == 0
 
-        - name: Reconfigure MongoDB replica set to use public hostnames
+        - name: Phase 1 - Update secondaries to public hostnames (keep PRIMARY unchanged)
           shell: >-
             docker exec mongo-jumpbox mongosh
-            "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | urlencode }}@mongo1:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
+            "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | urlencode }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
             --quiet --eval '
-              cfg = rs.conf();
-              cfg.members[0].host = "dev.airconcheck.com:27017";
-              cfg.members[1].host = "dev.airconcheck.com:27018";
-              cfg.members[2].host = "dev.airconcheck.com:27019";
-              rs.reconfig(cfg, {force: true});
+              function desiredHost(id){
+                if (id === 0) return "dev.airconcheck.com:27017";
+                if (id === 1) return "dev.airconcheck.com:27018";
+                if (id === 2) return "dev.airconcheck.com:27019";
+                throw new Error("unexpected member id: "+id);
+              }
+              const st = rs.status();
+              if (st.ok !== 1) { throw new Error("rs.status not ok"); }
+              const primary = (st.members||[]).find(m=>m.stateStr==="PRIMARY");
+              if (!primary) { throw new Error("no PRIMARY yet"); }
+              let cfg = rs.conf();
+              const primaryMember = cfg.members.find(m=>m.host===primary.name);
+              if (!primaryMember) { throw new Error("cannot map PRIMARY in cfg"); }
+              let changed = false;
+              cfg.members.forEach(m=>{
+                if (m._id !== primaryMember._id) {
+                  const want = desiredHost(m._id);
+                  if (m.host !== want) { m.host = want; changed = true; }
+                }
+              });
+              if (changed) { cfg.version++; rs.reconfig(cfg); print("Secondaries reconfigured"); }
+              else { print("Secondaries already configured"); }
             '
+          register: rs_reconfig_phase1
+          changed_when: '"reconfigured" in rs_reconfig_phase1.stdout'
+
+        - name: Step down current PRIMARY to allow new PRIMARY among updated hosts
+          shell: >-
+            docker exec mongo-jumpbox mongosh
+            "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | urlencode }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
+            --quiet --eval 'try { rs.stepDown(30); } catch(e) { }'
+          register: rs_stepdown
+          changed_when: false
+          failed_when: false
+
+        - name: Wait for new PRIMARY after stepdown
+          shell: >-
+            docker exec mongo-jumpbox mongosh
+            "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | urlencode }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
+            --quiet --eval '
+              try {
+                const st = rs.status();
+                if (st.ok !== 1) { quit(1); }
+                const p = (st.members||[]).find(m=>m.stateStr==="PRIMARY");
+                if (p && p.name) { print(p.name); } else { quit(1); }
+              } catch(e) { quit(2); }
+            '
+          register: new_primary
+          until: new_primary.rc == 0 and new_primary.stdout.strip() != ""
+          retries: 40
+          delay: 3
+          changed_when: false
+
+        - name: Phase 2 - Update remaining member (old PRIMARY) to public hostname
+          shell: >-
+            docker exec mongo-jumpbox mongosh
+            "mongodb://{{ mongo_root_user }}:{{ mongo_root_password | urlencode }}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource=admin"
+            --quiet --eval '
+              function desiredHost(id){
+                if (id === 0) return "dev.airconcheck.com:27017";
+                if (id === 1) return "dev.airconcheck.com:27018";
+                if (id === 2) return "dev.airconcheck.com:27019";
+                throw new Error("unexpected member id: "+id);
+              }
+              const st = rs.status();
+              if (st.ok !== 1) { throw new Error("rs.status not ok"); }
+              const primary = (st.members||[]).find(m=>m.stateStr==="PRIMARY");
+              if (!primary) { throw new Error("no PRIMARY yet"); }
+              let cfg = rs.conf();
+              // Update whichever member still differs from desired
+              let changed = false;
+              cfg.members.forEach(m=>{
+                const want = desiredHost(m._id);
+                if (m.host !== want) { m.host = want; changed = true; }
+              });
+              if (changed) { cfg.version++; rs.reconfig(cfg); print("Final member reconfigured"); }
+              else { print("All members already configured"); }
+            '
+          register: rs_reconfig_phase2
+          changed_when: '"reconfigured" in rs_reconfig_phase2.stdout'

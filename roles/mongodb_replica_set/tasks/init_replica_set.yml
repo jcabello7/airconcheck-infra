@@ -47,33 +47,124 @@
         let st = 0;
         try { st = rs.status().ok } catch (e) { st = 0 }
         if (st !== 1) {
-          rs.initiate({
-            _id: "{{ global_defaults.mongo_replicaset_name }}",
-            members: [
-              { _id: 0, host: "mongo1:27017" },
-              { _id: 1, host: "mongo2:27017" },
-              { _id: 2, host: "mongo3:27017" }
-            ]
-          });
-          print("Replica set initiated");
+          try {
+            rs.initiate({
+              _id: "{{ global_defaults.mongo_replicaset_name }}",
+              members: [
+                { _id: 0, host: "mongo1:27017" },
+                { _id: 1, host: "mongo2:27017" },
+                { _id: 2, host: "mongo3:27017" }
+              ]
+            });
+            print("Replica set initiated");
+          } catch (e) {
+            if ((e.codeName && e.codeName === "AlreadyInitialized") || /already initialized/i.test(e.message || String(e))) {
+              print("Replica set already initialized");
+            } else {
+              print("Replica set initiation error: " + (e.message || String(e)));
+              quit(1);
+            }
+          }
         } else {
           print("Replica set already initialized");
         }'
   register: rs_init
   changed_when: '"initiated" in rs_init.stdout'
+  retries: 5
+  delay: 5
+  until: rs_init.rc == 0
 
-- name: Detect current PRIMARY host
-  shell: |
-    docker exec mongo1 mongosh \
-      -u {{ mongo_root_user }} \
-      -p '{{ mongo_root_password }}' \
-      --authenticationDatabase admin \
-      --quiet --eval 'db.adminCommand({hello:1}).primary'
-  register: primary_host
-  until: primary_host.stdout.strip() != ""
-  retries: 20
-  delay: 3
-  changed_when: false
+- name: Detect PRIMARY and fallback reconfig if needed
+  block:
+    - name: Detect current PRIMARY host
+      shell: |
+        docker exec mongo1 mongosh \
+          -u {{ mongo_root_user }} \
+          -p '{{ mongo_root_password }}' \
+          --authenticationDatabase admin \
+          --quiet --eval '
+            try {
+              const st = rs.status();
+              if (st.ok !== 1) { quit(1); }
+              const primary = (st.members || []).find(m => m.stateStr === "PRIMARY");
+              if (primary && primary.name) {
+                print(primary.name);
+              } else {
+                quit(1);
+              }
+            } catch (e) {
+              quit(2);
+            }
+          '
+      register: primary_host
+      until: primary_host.rc == 0 and primary_host.stdout.strip() != ""
+      retries: 30
+      delay: 3
+      changed_when: false
+  rescue:
+    - name: Force reconfig to internal container hostnames
+      shell: |
+        docker exec mongo1 mongosh \
+          -u {{ mongo_root_user }} \
+          -p '{{ mongo_root_password }}' \
+          --authenticationDatabase admin \
+          --quiet --eval '
+            try {
+              var cfg = rs.conf();
+              cfg.members[0].host = "mongo1:27017";
+              cfg.members[1].host = "mongo2:27017";
+              cfg.members[2].host = "mongo3:27017";
+              rs.reconfig(cfg, {force: true});
+              print("Reconfigured RS to internal hostnames");
+            } catch (e) {
+              try {
+                rs.initiate({
+                  _id: "{{ global_defaults.mongo_replicaset_name }}",
+                  members: [
+                    { _id: 0, host: "mongo1:27017" },
+                    { _id: 1, host: "mongo2:27017" },
+                    { _id: 2, host: "mongo3:27017" }
+                  ]
+                });
+                print("Initiated RS with internal hostnames");
+              } catch (e2) {
+                if (!((e2.codeName && e2.codeName === "AlreadyInitialized") || /already initialized/i.test(e2.message || String(e2)))) {
+                  print("Failed to reconfig/init RS: " + (e2.message || String(e2)));
+                  quit(1);
+                }
+              }
+            }
+          '
+      register: rs_reconfig_internal
+      changed_when: '"Reconfigured RS" in rs_reconfig_internal.stdout or "Initiated RS" in rs_reconfig_internal.stdout'
+    - name: Wait a bit after reconfig
+      wait_for:
+        timeout: 5
+    - name: Detect current PRIMARY host (after reconfig)
+      shell: |
+        docker exec mongo1 mongosh \
+          -u {{ mongo_root_user }} \
+          -p '{{ mongo_root_password }}' \
+          --authenticationDatabase admin \
+          --quiet --eval '
+            try {
+              const st = rs.status();
+              if (st.ok !== 1) { quit(1); }
+              const primary = (st.members || []).find(m => m.stateStr === "PRIMARY");
+              if (primary && primary.name) {
+                print(primary.name);
+              } else {
+                quit(1);
+              }
+            } catch (e) {
+              quit(2);
+            }
+          '
+      register: primary_host
+      until: primary_host.rc == 0 and primary_host.stdout.strip() != ""
+      retries: 60
+      delay: 3
+      changed_when: false
 
 - name: Map PRIMARY host to container name
   set_fact:

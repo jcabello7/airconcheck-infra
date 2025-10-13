@@ -1,0 +1,30 @@
+{% if item.wildcard_to is defined %}
+; No zonefile generated for wildcard_synth zones
+; Zone: {{ item.zone }} handled via Corefile template plugin
+{% else %}
+$ORIGIN {{ item.zone }}.
+$TTL 300
+@   IN  SOA ns1. admin.{{ item.zone }}. (
+        2025010101 ; serial
+        3600       ; refresh
+        1800       ; retry
+        604800     ; expire
+        300 )      ; minimum
+
+    IN  NS  ns1.
+ns1 IN  A   127.0.0.1
+
+{% for rec in item.records %}
+{%   set value = rec.value %}
+{%   if value == 'TAILSCALE_SELF' %}
+{%     set value = coredns_bind_ip_effective %}
+{%   endif %}
+{%   if rec.type == 'A' %}
+{{ rec.name }}  IN  A   {{ value }}
+{%   elif rec.type == 'CNAME' %}
+{{ rec.name }}  IN  CNAME   {{ value }}
+{%   elif rec.type == 'TXT' %}
+{{ rec.name }}  IN  TXT {{ '"' ~ value ~ '"' }}
+{%   endif %}
+{% endfor %}
+{% endif %}
