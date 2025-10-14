@@ -15,6 +15,18 @@
     dest: "{{ global_defaults.homepage_compose_path }}/docker-compose.yml"
 
 
+- name: Template Homepage config files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ global_defaults.homepage_config_path }}/{{ item.dest }}"
+  loop:
+    - { src: 'settings.yaml.j2', dest: 'settings.yaml' }
+    - { src: 'services.yaml.j2', dest: 'services.yaml' }
+    - { src: 'docker.yaml.j2',   dest: 'docker.yaml' }
+    - { src: 'custom.css.j2',    dest: 'custom.css' }
+  notify: restart homepage
+
+
 - name: Run docker compose
   command: docker compose up -d
   args:

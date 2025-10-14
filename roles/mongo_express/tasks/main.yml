@@ -4,11 +4,15 @@
     path: "{{ global_defaults.app_base_path }}/mongo_express"
     state: directory
     mode: '0755'
+  tags:
+    - mongo_express
 
 - name: Copy docker-compose for Mongo Express
   template:
     src: docker-compose.yml.j2
     dest: "{{ global_defaults.app_base_path }}/mongo_express/docker-compose.yml"
+  tags:
+    - mongo_express
 
 - name: Deploy/Restart Mongo Express
   community.docker.docker_compose_v2:
@@ -17,3 +21,5 @@
     recreate: always
     remove_orphans: true
     pull: always
+  tags:
+    - mongo_express

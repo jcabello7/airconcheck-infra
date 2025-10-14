@@ -3,6 +3,11 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo1
     hostname: mongo1
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=MongoDB Primary?
+      - homepage.icon=si-mongodb
+      - homepage.description=Replica set member (mongo1)
     command:
       - mongod
       - --replSet
@@ -31,6 +36,11 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo2
     hostname: mongo2
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=MongoDB Secondary
+      - homepage.icon=si-mongodb
+      - homepage.description=Replica set member (mongo2)
     command:
       - mongod
       - --replSet
@@ -58,6 +68,11 @@ services:
     image: {{ global_defaults.mongo_image }}
     container_name: mongo3
     hostname: mongo3
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=MongoDB Secondary
+      - homepage.icon=si-mongodb
+      - homepage.description=Replica set member (mongo3)
     command:
       - mongod
       - --replSet

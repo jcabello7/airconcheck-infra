@@ -1,0 +1,5 @@
+---
+- name: restart homepage
+  command: docker compose up -d
+  args:
+    chdir: "{{ global_defaults.homepage_compose_path }}"

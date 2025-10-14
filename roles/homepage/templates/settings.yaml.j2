@@ -1,0 +1,43 @@
+title: Airconcheck Dashboard
+description: Servicios y herramientas por entorno
+theme: dark
+color: slate
+target: _blank
+showStats: true
+statusStyle: dot
+fullWidth: true
+language: es
+
+# Links shown in the header (replace default GitHub with our project)
+links:
+  - Github:
+      icon: mdi-github
+      href: https://github.com/jcabello7/airconcheck-infra
+
+# Layout with Tabs per environment
+# First row: curated links, Second row: containers (auto-discovered via labels)
+layout:
+  - PROD-LINKS:
+      tab: Produccion
+      style: row
+      columns: 4
+  - PROD:
+      tab: Produccion
+      style: row
+      columns: 4
+  - TEST-LINKS:
+      tab: Preproduccion
+      style: row
+      columns: 4
+  - TEST:
+      tab: Preproduccion
+      style: row
+      columns: 4
+  - DEV-LINKS:
+      tab: Desarrollo
+      style: row
+      columns: 4
+  - DEV:
+      tab: Desarrollo
+      style: row
+      columns: 4

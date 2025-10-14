@@ -1,8 +1,12 @@
-version: "3.9"
 services:
   coredns:
     image: "{{ coredns_image }}"
     container_name: coredns
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=CoreDNS
+      - homepage.icon=mdi-dns
+      - homepage.description=DNS interno por entorno
     command:
       - -conf
       - /etc/coredns/Corefile

@@ -1,8 +1,12 @@
-version: '3.8'
 services:
   {{ global_defaults.docker_proxy_container_name }}:
     image: {{ global_defaults.docker_proxy_image }}
     container_name: {{ global_defaults.docker_proxy_container_name }}
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Docker Socket Proxy
+      - homepage.icon=mdi-docker
+      - homepage.description=Proxy del socket Docker (acceso restringido)
     networks:
       - management
     volumes:

@@ -4,6 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: mongo-jumpbox
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Mongo Jumpbox
+      - homepage.icon=mdi-console
+      - homepage.description=Shell utilidades MongoDB
     tty: true
     stdin_open: true
     command: bash

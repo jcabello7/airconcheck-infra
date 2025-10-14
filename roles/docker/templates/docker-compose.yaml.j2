@@ -20,6 +20,12 @@ services:
     image: portainer/portainer-ce:${PORTAINER_VERSION}
     container_name: portainer
     restart: unless-stopped
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Portainer
+      - homepage.icon=si-portainer
+      - homepage.href=https://portainer.{{ swag_internal_url }}
+      - homepage.description=Container management UI
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{ global_defaults.app_base_path }}/portainer:/data
@@ -31,6 +37,12 @@ services:
     container_name: swag-external
     cap_add:
       - NET_ADMIN
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Frontend (public)
+      - homepage.icon=si-nginx
+      - homepage.href=https://{{ swag_external_url }}
+      - homepage.description=Public reverse proxy (SWAG)
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -53,6 +65,12 @@ services:
     container_name: swag-internal
     cap_add:
       - NET_ADMIN
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Gateway (internal)
+      - homepage.icon=si-nginx
+      - homepage.href=https://portainer.{{ swag_internal_url }}:8443
+      - homepage.description=Internal reverse proxy for services
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -78,6 +96,12 @@ services:
       context: {{ global_defaults.angular_ssr_build_context | default('../angular-ssr') }}
       dockerfile: Dockerfile
     container_name: angular-ssr
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Frontend SSR
+      - homepage.icon=mdi-language-typescript
+      - homepage.href=https://{{ swag_external_url }}
+      - homepage.description=Angular SSR app
     expose:
       - "4000"
     networks:
@@ -93,6 +117,12 @@ services:
       context: {{ global_defaults.backend_build_context | default('../backend') }}
       dockerfile: Dockerfile
     container_name: backend
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Backend API
+      - homepage.icon=mdi-nodejs
+      - homepage.href=https://backend.{{ swag_internal_url }}:8443
+      - homepage.description=Express API service
     env_file:
       - {{ global_defaults.backend_build_context }}/.env
     networks:

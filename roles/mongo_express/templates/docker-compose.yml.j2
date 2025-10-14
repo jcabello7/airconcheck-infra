@@ -2,6 +2,12 @@ services:
   mongo-express:
     image: {{ global_defaults.mongo_express_image }}
     container_name: mongo-express
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Mongo Express
+      - homepage.icon=si-mongodb
+      - homepage.href=https://mongo-express.{{ swag_internal_url }}:8443
+      - homepage.description=MongoDB web UI
     environment:
       ME_CONFIG_MONGODB_URL: "{{ global_defaults.mongo_rs_uri }}"
       ME_CONFIG_BASICAUTH: "false"
@@ -17,7 +23,7 @@ networks:
     name: internal_db
     external: true
 {% if deployment_env == "dev" %}
-    internal: false    
+    internal: false
 {% else %}
     driver: bridge
     internal: true
