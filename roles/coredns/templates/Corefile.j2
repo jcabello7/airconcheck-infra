@@ -7,8 +7,9 @@
 {% for z in coredns_zones %}
 {{ z.zone }}:53 {
   {% if z.wildcard_to is defined %}
-  # Mode 2: wildcard synthesizer + forward rest
-  template IN A *.{{ z.zone }} {
+  # Mode 2: wildcard synthesizer + forward rest (exclude apex)
+  template IN A {{ z.zone }} {
+    match "^(.+[.]){{ z.zone | replace('.', '[.]') }}[.]$"
     answer "{{'{{'}}.Name{{'}}'}} 300 IN A {{ (z.wildcard_to == 'TAILSCALE_SELF') | ternary(coredns_bind_ip_effective, z.wildcard_to) }}"
   }
   {% set fwd = (coredns_forwarders | default([])) %}

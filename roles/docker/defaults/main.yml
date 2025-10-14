@@ -12,6 +12,14 @@ docker_networks:
 # Needed directories for Airconcheck
 app_directories:
   - "{{ global_defaults.app_base_path }}/frontend"
+  - "{{ global_defaults.app_base_path }}/backend"
+  - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
   - "{{ global_defaults.app_base_path }}/portainer"
   - "{{ global_defaults.app_base_path }}/swag/external"
+  - "{{ global_defaults.app_base_path }}/swag/external/nginx"
+  - "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs"
+  - "{{ global_defaults.app_base_path }}/swag/external/dns-conf"
   - "{{ global_defaults.app_base_path }}/swag/internal"
+  - "{{ global_defaults.app_base_path }}/swag/internal/nginx"
+  - "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs"
+  - "{{ global_defaults.app_base_path }}/swag/internal/dns-conf"

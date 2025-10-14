@@ -11,7 +11,8 @@ angular_ssr_copy_build: false
 expose_backend_port: false
 
 # Expose backend to the SWAG-internal proxy
-deploy_backend: false
+deploy_backend: true
+deploy_angular_ssr: true
 
 # Base domain URLs
 swag_external_url: "airconcheck.com"
@@ -34,3 +35,44 @@ coredns_enabled: true
 coredns_zones:
   - zone: airconcheck.com
     wildcard_to: TAILSCALE_SELF
+
+# -------------------------------------------------
+# Bootstrap (prod) — variables necesarias
+# Rellena este bloque antes de ejecutar playbooks/bootstrap_prod.yml
+# -------------------------------------------------
+
+# Usuario dedicado que se creará en el host para ejecutar Ansible (sudo sin password)
+ansible_dedicated_user: ansible
+
+# Ruta (en el controlador Ansible) a la clave pública que se autorizará para ese usuario
+# Ejemplo: ~/.ssh/id_rsa.pub o ~/.ssh/id_ed25519.pub
+ansible_ssh_pub_key_path: ~/.ssh/ansible.pub
+
+# Tailscale
+# Si quieres que el alta en Tailscale sea no interactiva, define tailscale_authkey con tu auth key
+# De lo contrario, podrás ejecutar 'tailscale up' manualmente tras el play
+tailscale_authkey: tskey-auth-ktSTmCYwLY11CNTRL-i63vQsrzp2bd644xZV7B3bw6V66uAmuGi
+
+# Flags de 'tailscale up'
+tailscale_accept_routes: true
+tailscale_accept_dns: true
+tailscale_ssh: true
+
+# Rutas y repos APT (no suelen requerir cambios)
+tailscale_repo_key_path: /usr/share/keyrings/tailscale-archive-keyring.gpg
+tailscale_repo_list_path: /etc/apt/sources.list.d/tailscale.list
+
+# Zabbix Agent 2
+# Define el destino de tu servidor Zabbix (al menos uno)
+zabbix_server: 10.60.10.1
+# zabbix_server_active: zabbix.rootme.io
+
+# Versión mayor LTS del repo Zabbix y rutas APT (normalmente no tocar)
+zabbix_major: "7.0"
+zabbix_repo_key_path: /usr/share/keyrings/zabbix.gpg
+zabbix_repo_list_path: /etc/apt/sources.list.d/zabbix.list
+
+# (Opcional) IDs de clave pública Zabbix a importar desde keyserver si fuera necesario (fallback)
+# Ejemplo incluye el NO_PUBKEY visto en noble: D913219AB5333005
+# zabbix_repo_pubkeys:
+#   - D913219AB5333005

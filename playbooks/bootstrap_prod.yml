@@ -1,0 +1,179 @@
+---
+- name: Bootstrap de servidor Ubuntu 24.04 (prod)
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks: []
+
+  roles:
+    - role: ansible_user
+
+  tasks:
+    - name: Comprobar variables requeridas de bootstrap
+      assert:
+        that:
+          - ansible_dedicated_user is defined
+          - ansible_ssh_pub_key_path is defined
+          - tailscale_repo_key_path is defined
+          - tailscale_repo_list_path is defined
+          - zabbix_repo_key_path is defined
+          - zabbix_repo_list_path is defined
+          - zabbix_major is defined
+        fail_msg: "Faltan variables en group_vars/prod.yml. Revisa el bloque 'Bootstrap (prod)'."
+        success_msg: "Variables de bootstrap presentes."
+
+    - name: Asegurar dependencias base
+      apt:
+        name:
+          - curl
+          - ca-certificates
+          - gnupg
+          - dirmngr
+          - apt-transport-https
+        state: present
+
+    # ----- Tailscale -----
+    - name: Añadir clave del repositorio de Tailscale
+      get_url:
+        url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_distribution_release }}.noarmor.gpg"
+        dest: "{{ tailscale_repo_key_path }}"
+        mode: '0644'
+
+    - name: Configurar repositorio APT de Tailscale
+      copy:
+        dest: "{{ tailscale_repo_list_path }}"
+        mode: '0644'
+        content: |
+          deb [signed-by={{ tailscale_repo_key_path }}] https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main
+
+    - name: Instalar Tailscale
+      apt:
+        name: tailscale
+        state: present
+
+    - name: Habilitar y arrancar tailscaled
+      systemd:
+        name: tailscaled
+        state: started
+        enabled: true
+
+    - name: Hacer 'tailscale up' (no interactivo) si se proporciona authkey
+      command: >-
+        tailscale up
+        {{ tailscale_accept_routes | ternary('--accept-routes', '') }}
+        {{ tailscale_accept_dns | ternary('--accept-dns', '') }}
+        {{ tailscale_ssh | ternary('--ssh', '') }}
+        --authkey={{ tailscale_authkey }}
+      when: tailscale_authkey is defined and tailscale_authkey | length > 0
+      register: tailscale_up
+      changed_when: tailscale_up.rc == 0
+      failed_when: false
+
+    # ----- Zabbix Agent 2 -----
+    - name: Descargar clave ASCII del repositorio oficial de Zabbix (siempre)
+      get_url:
+        url: https://repo.zabbix.com/zabbix-official-repo.key
+        dest: "{{ zabbix_repo_key_path }}.asc"
+        mode: '0644'
+        force: true
+
+    - name: Eliminar keyring Zabbix previo si existe (forzar refresco)
+      file:
+        path: "{{ zabbix_repo_key_path }}"
+        state: absent
+
+    - name: Convertir clave Zabbix a formato keyring (gpg --dearmor)
+      command: >-
+        gpg --dearmor -o {{ zabbix_repo_key_path }} {{ zabbix_repo_key_path }}.asc
+      args:
+        warn: false
+
+    - name: Asegurar permisos correctos del keyring de Zabbix
+      file:
+        path: "{{ zabbix_repo_key_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: (Opcional) Importar claves públicas adicionales de Zabbix por ID desde keyserver
+      when: zabbix_repo_pubkeys is defined and (zabbix_repo_pubkeys | length) > 0
+      block:
+        - name: Recibir claves por ID desde keyserver.ubuntu.com
+          command: >-
+            gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys {{ item }}
+          loop: "{{ zabbix_repo_pubkeys }}"
+          register: zbx_keys_recv
+          changed_when: "rc == 0"
+          failed_when: false
+
+        - name: Exportar claves recibidas al keyring usado por APT (dearmor)
+          shell: >-
+            set -o pipefail && gpg --export {{ zabbix_repo_pubkeys | join(' ') }}
+            | gpg --dearmor > {{ zabbix_repo_key_path }}
+          args:
+            executable: /bin/bash
+          register: zbx_keys_export
+          changed_when: true
+
+        - name: Asegurar permisos tras exportar claves
+          file:
+            path: "{{ zabbix_repo_key_path }}"
+            owner: root
+            group: root
+            mode: '0644'
+
+    - name: Configurar repositorio APT de Zabbix {{ zabbix_major }}
+      copy:
+        dest: "{{ zabbix_repo_list_path }}"
+        mode: '0644'
+        content: |
+          deb [signed-by={{ zabbix_repo_key_path }}] https://repo.zabbix.com/zabbix/{{ zabbix_major }}/ubuntu/ {{ ansible_distribution_release }} main
+
+    - name: Actualizar índices APT tras configurar repos (Tailscale/Zabbix)
+      apt:
+        update_cache: yes
+
+    - name: Actualizar el sistema (dist-upgrade)
+      apt:
+        upgrade: dist
+        autoremove: yes
+
+    - name: Instalar Zabbix Agent 2
+      apt:
+        name: zabbix-agent2
+        state: present
+
+    - name: Configurar Zabbix Agent 2 - Server/ServerActive
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regexp: '^{{ item.key }}='
+        line: '{{ item.key }}={{ item.value }}'
+        create: no
+        backup: yes
+      loop:
+        - { key: 'Server', value: '{{ zabbix_server | default("") }}' }
+        - { key: 'ServerActive', value: '{{ zabbix_server_active | default("") }}' }
+      when: (zabbix_server is defined) or (zabbix_server_active is defined)
+
+    - name: Configurar Zabbix Agent 2 - Hostname
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regexp: '^Hostname='
+        line: 'Hostname={{ ansible_fqdn | default(inventory_hostname) }}'
+        create: no
+        backup: yes
+
+    - name: Habilitar y arrancar zabbix-agent2
+      systemd:
+        name: zabbix-agent2
+        state: started
+        enabled: true
+
+    - name: Mostrar recordatorio si falta configurar Zabbix Server
+      debug:
+        msg: >-
+          No se definió zabbix_server/zabbix_server_active. El agente está instalado
+          pero no tiene destino configurado. Define estas variables en el inventario de prod
+          y vuelve a ejecutar el play para aplicar la configuración.
+      when: (zabbix_server is not defined) and (zabbix_server_active is not defined)

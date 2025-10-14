@@ -72,6 +72,7 @@ services:
       - management
       - internal_db
       
+{% if deploy_angular_ssr | default(false) %}
   angular-ssr:
     build:
       context: {{ global_defaults.angular_ssr_build_context | default('../angular-ssr') }}
@@ -83,8 +84,10 @@ services:
       - proxy
       - internal_db
     restart: unless-stopped
+{% endif %}
 
 
+{% if deploy_backend | default(false) %}
   backend:
     build:
       context: {{ global_defaults.backend_build_context | default('../backend') }}
@@ -107,3 +110,4 @@ services:
       - "3000:3000"
 {% endif %}
     restart: unless-stopped
+{% endif %}

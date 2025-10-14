@@ -1,5 +1,7 @@
 # Instructions: https://github.com/certbot/certbot/blob/master/certbot-dns-cloudflare/certbot_dns_cloudflare/__init__.py#L20
-# Replace with your values
+# Provided by Ansible. Prefer `dns_cloudflare_api_token` and fallback to legacy `cloudflare_api_token`.
 
-# With token (comment out api key & email):
-dns_cloudflare_api_token = {{ cloudflare_api_token }}
+{% set cf_token = (dns_cloudflare_api_token if (dns_cloudflare_api_token is defined and (dns_cloudflare_api_token | length) > 0) else cloudflare_api_token) %}
+
+# Token-based auth (recommended)
+dns_cloudflare_api_token = {{ cf_token }}

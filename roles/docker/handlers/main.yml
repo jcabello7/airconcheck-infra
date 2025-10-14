@@ -1,0 +1,14 @@
+---
+# Restart SWAG containers when config changes
+
+- name: restart swag-external
+  community.docker.docker_container:
+    name: swag-external
+    state: started
+    restart: true
+
+- name: restart swag-internal
+  community.docker.docker_container:
+    name: swag-internal
+    state: started
+    restart: true

@@ -1,10 +1,32 @@
+- name: Asegurar directorios de SWAG (external/internal)
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: dockeruser
+    group: dockeruser
+    mode: "0755"
+  loop:
+    - "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs"
+    - "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs"
+    - "{{ global_defaults.app_base_path }}/swag/external/dns-conf"
+    - "{{ global_defaults.app_base_path }}/swag/internal/dns-conf"
+
+- name: Validar token de Cloudflare cuando SWAG usa DNS-01
+  assert:
+    that:
+      - (dns_cloudflare_api_token is defined and (dns_cloudflare_api_token | length) > 0) or (cloudflare_api_token is defined and (cloudflare_api_token | length) > 0)
+    fail_msg: "Falta definir dns_cloudflare_api_token (o cloudflare_api_token) para SWAG con DNSPLUGIN=cloudflare"
+  when: (global_defaults.swag_external_dnsplugin | default('')) == 'cloudflare' or (global_defaults.swag_internal_dnsplugin | default('')) == 'cloudflare'
+ 
 - name: Crear configuración SWAG EXTERNAL para Angular SSR
+  when: deploy_angular_ssr | default(false)
   template:
-    src: swag-site-confs/angular-ssr.subdomain.conf.j2
-    dest: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/angular-ssr.subdomain.conf"
-    owner: root
-    group: root
-    mode: "0644"
+     src: swag-site-confs/angular-ssr.subdomain.conf.j2
+     dest: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/angular-ssr.subdomain.conf"
+     owner: root
+     group: root
+     mode: "0644"
+  notify: restart swag-external
 
 - name: Crear configuración SWAG INTERNAL para cada servicio
   template:
@@ -17,31 +39,53 @@
   vars:
     swag_internal_service_name: "{{ item.name }}"
     swag_internal_service_port: "{{ item.port }}"
+  notify: restart swag-internal
 
 - name: Crear configuració SWAG INTERNAL específica per backend
   template:
     src: swag-site-confs/backend.subdomain.conf.j2
     dest: "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs/backend.subdomain.conf"
-  when: deploy_backend is defined and deploy_backend
+  when: deploy_backend | default(false)
+  notify: restart swag-internal
 
 - name: Eliminar configuració SWAG INTERNAL específica per backend si no s'ha de desplegar
   file:
     path: "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs/backend.subdomain.conf"
     state: absent
   when: deploy_backend is not defined or not deploy_backend
+  notify: restart swag-internal
+
+- name: Eliminar configuración SWAG EXTERNAL de Angular SSR si no se despliega
+  file:
+    path: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/angular-ssr.subdomain.conf"
+    state: absent
+  when: deploy_angular_ssr is not defined or not deploy_angular_ssr
+  notify: restart swag-external
     
 - name: Generar dns-conf.ini para SWAG EXTERNAL
   template:
     src: swag/dns-conf.ini.j2
-    dest: "{{ global_defaults.app_base_path }}/swag/external/dns-conf.ini"
+    dest: "{{ global_defaults.app_base_path }}/swag/external/dns-conf/cloudflare.ini"
     owner: root
     group: root
     mode: "0600"
+  when: (global_defaults.swag_external_dnsplugin | default('')) == 'cloudflare'
+  notify: restart swag-external
 
 - name: Generar dns-conf.ini para SWAG INTERNAL
   template:
     src: swag/dns-conf.ini.j2
-    dest: "{{ global_defaults.app_base_path }}/swag/internal/dns-conf.ini"
+    dest: "{{ global_defaults.app_base_path }}/swag/internal/dns-conf/cloudflare.ini"
     owner: root
     group: root
     mode: "0600"
+  when: (global_defaults.swag_internal_dnsplugin | default('')) == 'cloudflare'
+  notify: restart swag-internal
+
+- name: Eliminar archivos dns-conf.ini legacy (ubicación antigua)
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ global_defaults.app_base_path }}/swag/external/dns-conf.ini"
+    - "{{ global_defaults.app_base_path }}/swag/internal/dns-conf.ini"
