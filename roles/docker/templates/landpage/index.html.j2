@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AirconCheck — Landing</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; margin: 0; padding: 0; background:#0b1320; color:#e8eefc; }
+      .wrap { display:flex; min-height:100vh; align-items:center; justify-content:center; text-align:center; padding: 2rem; }
+      .card { max-width: 720px; }
+      a { color: #61dafb; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>AirconCheck</h1>
+        <p>Landing page en {{ deployment_env | upper }}.</p>
+        <p>
+          {% if deployment_env == 'prod' and (landpage_apex_enabled | default(false)) %}
+            App: <a href="https://app.{{ swag_external_url }}">https://app.{{ swag_external_url }}</a>
+          {% else %}
+            Landing en: <a href="https://landpage.{{ swag_external_url }}">https://landpage.{{ swag_external_url }}</a>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </body>
+  </html>

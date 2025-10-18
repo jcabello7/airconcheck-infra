@@ -3,7 +3,18 @@
     - Principal:
         icon: mdi-web
         href: https://airconcheck.com
-        description: Frontend público
+        description: Sitio principal
+    {% if landpage_apex_enabled | default(false) %}
+    - App:
+        icon: mdi-web
+        href: https://app.airconcheck.com
+        description: Angular SSR (app)
+    {% else %}
+    - Landpage:
+        icon: si-nginx
+        href: https://landpage.airconcheck.com
+        description: Landing pública
+    {% endif %}
     - Portainer:
         icon: portainer.png
         href: https://portainer.airconcheck.com:8443
@@ -22,6 +33,10 @@
         icon: mdi-web
         href: https://test.airconcheck.com
         description: Frontend de test
+    - Landpage:
+        icon: si-nginx
+        href: https://landpage.test.airconcheck.com
+        description: Landing de test
     - Portainer:
         icon: portainer.png
         href: https://portainer.test.airconcheck.com:8443
@@ -40,6 +55,10 @@
         icon: mdi-web
         href: https://dev.airconcheck.com
         description: Frontend de desarrollo
+    - Landpage:
+        icon: si-nginx
+        href: https://landpage.dev.airconcheck.com
+        description: Landing de desarrollo
     - Portainer:
         icon: portainer.png
         href: https://portainer.dev.airconcheck.com:8443

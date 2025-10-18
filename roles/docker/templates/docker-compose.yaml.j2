@@ -100,7 +100,7 @@ services:
       - homepage.group={{ deployment_env | upper }}
       - homepage.name=Frontend SSR
       - homepage.icon=mdi-language-typescript
-      - homepage.href=https://{{ swag_external_url }}
+      - homepage.href=https://{{ (deployment_env == 'prod' and (landpage_apex_enabled | default(false))) | ternary('app.' + swag_external_url, swag_external_url) }}
       - homepage.description=Angular SSR app
     expose:
       - "4000"
@@ -108,6 +108,25 @@ services:
       - proxy
       - internal_db
     restart: unless-stopped
+{% endif %}
+
+{% if deploy_landpage | default(false) %}
+  landpage:
+    image: nginx:alpine
+    container_name: landpage
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Landpage
+      - homepage.icon=si-nginx
+      - homepage.href=https://{{ (deployment_env == 'prod' and (landpage_apex_enabled | default(false))) | ternary(swag_external_url, 'landpage.' + swag_external_url) }}
+      - homepage.description=Static landing page
+    volumes:
+      - {{ global_defaults.app_base_path }}/landpage/html:/usr/share/nginx/html:ro
+    expose:
+      - "80"
+    restart: unless-stopped
+    networks:
+      - proxy
 {% endif %}
 
 

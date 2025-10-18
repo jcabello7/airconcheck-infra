@@ -2,7 +2,7 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
 
-    server_name {{ angular_ssr_server_name | default(swag_external_url) }};
+    server_name {{ landpage_server_name }};
 
     include /config/nginx/ssl.conf;
 
@@ -11,8 +11,8 @@ server {
     location / {
         include /config/nginx/proxy.conf;
         include /config/nginx/resolver.conf;
-        set $upstream_app angular-ssr;
-        set $upstream_port 4000;
+        set $upstream_app landpage;
+        set $upstream_port 80;
         set $upstream_proto http;
         proxy_pass $upstream_proto://$upstream_app:$upstream_port;
     }

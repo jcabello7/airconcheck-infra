@@ -13,6 +13,7 @@ expose_backend_port: false
 # Expose backend to the SWAG-internal proxy
 deploy_backend: true
 deploy_angular_ssr: true
+deploy_landpage: true
 
 # Base domain URLs
 swag_external_url: "airconcheck.com"
@@ -42,6 +43,9 @@ coredns_zones:
 # Cloudflare (1.1.1.1/1.0.0.1), mientras que los subdominios (*.airconcheck.com)
 # seguirán apuntando a Tailscale.
 coredns_apex_internal: true
+
+# Landpage in prod: if true, landpage serves apex (airconcheck.com) and angular-ssr moves to app.airconcheck.com
+landpage_apex_enabled: true
 
 # -------------------------------------------------
 # Bootstrap (prod) — variables necesarias

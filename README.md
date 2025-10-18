@@ -37,6 +37,7 @@ ansible-playbook playbooks/debug-vars.yml -i inventories/test/
 | Service         | Image                           | Ports             | Description                     |
 |------------------|----------------------------------|--------------------|---------------------------------|
 | angular-ssr      | node:20 + build SSR             | 4000 (internal)    | Frontend Angular SSR            |
+| landpage         | nginx:alpine                    | 80 (internal)      | Static landing page (public)    |
 | portainer        | portainer/portainer-ce:2.27.1   | 9000               | Docker UI                       |
 | swag-external    | linuxserver/swag:3.3.0          | 443                | Public-facing reverse proxy     |
 | swag-internal    | linuxserver/swag:3.3.0          | 8443               | Internal services via VPN/CF    |
@@ -48,7 +49,7 @@ ansible-playbook playbooks/debug-vars.yml -i inventories/test/
 
 | Environment | URL                                      | Service           |
 |-------------|-------------------------------------------|--------------------|
-| prod        | https://airconcheck.com                  | Angular SSR        |
+| prod        | https://airconcheck.com                  | Angular SSR (or Landpage if toggle) |
 | test        | https://test.airconcheck.com             | Angular SSR (test) |
 | prod        | https://portainer.airconcheck.com:8443   | Portainer (internal) |
 | test        | https://portainer.test.airconcheck.com:8443 | Portainer (internal test) |
@@ -200,6 +201,25 @@ Para no fijar la IP pública del apex, en prod usamos un modo de "comodín sint�
 - `*.airconcheck.com` se responde localmente (IP Tailscale del host de prod).
 - `airconcheck.com` (apex) y demás nombres no coincidentes se reenvían a Internet (forwarders o `/etc/resolv.conf`).
 Esto permite que un cambio de IP pública se refleje automáticamente al actualizar los DNS públicos, sin tocar Ansible.
+
+### Landing page (nginx) y dominios
+
+- Nuevo contenedor `landpage` (nginx)
+  - DEV/TEST: expuesto en `https://landpage.<env>.airconcheck.com` a través de `swag-external`.
+  - PROD: controlado por `landpage_apex_enabled` en `inventories/prod/group_vars/prod.yml`.
+    - `true`: `airconcheck.com` apunta a Landpage y `angular-ssr` pasa a `app.airconcheck.com`.
+    - `false`: Landpage en `landpage.airconcheck.com` y `angular-ssr` permanece en `airconcheck.com`.
+
+Variables de inventario relevantes:
+
+```yaml
+# dev/test
+deploy_landpage: true
+
+# prod
+deploy_landpage: true
+landpage_apex_enabled: false  # si true, angular-ssr → app.airconcheck.com y landpage → airconcheck.com
+```
 
 ### Troubleshooting
 - Check the container and compose files under `{{ app_base_path }}/coredns` (by default `/opt/airconcheck/coredns`).

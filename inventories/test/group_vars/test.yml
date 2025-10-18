@@ -12,6 +12,7 @@ expose_backend_port: false
 
 # Expose backend to the SWAG-internal proxy
 deploy_backend: false
+deploy_landpage: true
 
 # Base domain URLs
 swag_external_url: "test.airconcheck.com"
