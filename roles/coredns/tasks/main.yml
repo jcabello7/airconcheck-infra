@@ -4,6 +4,7 @@
     path: "{{ coredns_compose_path }}"
     state: directory
     mode: '0755'
+  tags: [coredns]
 
 - name: Detect tailscale0 IP when unset
   shell: |
@@ -15,6 +16,7 @@
   changed_when: false
   failed_when: false
   when: (coredns_bind_ip | length) == 0
+  tags: [coredns]
 
 - name: Set bind IP fact
   set_fact:
@@ -23,22 +25,26 @@
         coredns_bind_ip if (coredns_bind_ip | length) > 0 else
         (tailscale_ip_cmd.stdout | trim | default('0.0.0.0'))
       }}
+  tags: [coredns]
 
 - name: Render zone files
   template:
     src: zonefile.j2
     dest: "{{ coredns_compose_path }}/zone_{{ item.zone }}.db"
   loop: "{{ coredns_zones | rejectattr('wildcard_to', 'defined') | list }}"
+  tags: [coredns]
 
 - name: Render Corefile
   template:
     src: Corefile.j2
     dest: "{{ coredns_compose_path }}/Corefile"
+  tags: [coredns]
 
 - name: Render docker-compose for CoreDNS
   template:
     src: docker-compose.yml.j2
     dest: "{{ coredns_compose_path }}/docker-compose.yml"
+  tags: [coredns]
 
 - name: Pull and run CoreDNS
   community.docker.docker_compose_v2:
@@ -46,3 +52,4 @@
     state: present
     recreate: always
     remove_orphans: true
+  tags: [coredns]

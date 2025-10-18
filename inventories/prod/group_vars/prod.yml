@@ -31,10 +31,17 @@ swag_internal_services:
 
 # CoreDNS enabled por defecto en prod
 # Modo: wildcard synth para *.airconcheck.com hacia Tailscale y forward del resto (apex via Internet)
+
 coredns_enabled: true
 coredns_zones:
   - zone: airconcheck.com
     wildcard_to: TAILSCALE_SELF
+
+# Si true (por defecto), CoreDNS también resolverá el apex (airconcheck.com)
+# a la IP interna de Tailscale. Si false, el apex se resolverá a través de
+# Cloudflare (1.1.1.1/1.0.0.1), mientras que los subdominios (*.airconcheck.com)
+# seguirán apuntando a Tailscale.
+coredns_apex_internal: true
 
 # -------------------------------------------------
 # Bootstrap (prod) — variables necesarias

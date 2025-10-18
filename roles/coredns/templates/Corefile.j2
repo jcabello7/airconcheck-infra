@@ -11,12 +11,26 @@
   template IN A {{ z.zone }} {
     match "^(.+[.]){{ z.zone | replace('.', '[.]') }}[.]$"
     answer "{{'{{'}}.Name{{'}}'}} 300 IN A {{ (z.wildcard_to == 'TAILSCALE_SELF') | ternary(coredns_bind_ip_effective, z.wildcard_to) }}"
+    fallthrough
   }
-  {% set fwd = (coredns_forwarders | default([])) %}
-  {% if fwd | length > 0 %}
+  {% if (coredns_apex_internal | default(true)) %}
+  # Optional: also synthesize apex to Tailscale/internal
+  template IN A {{ z.zone }} {
+    match "^{{ z.zone | replace('.', '[.]') }}[.]$"
+    answer "{{'{{'}}.Name{{'}}'}} 300 IN A {{ (z.wildcard_to == 'TAILSCALE_SELF') | ternary(coredns_bind_ip_effective, z.wildcard_to) }}"
+    fallthrough
+  }
+  {% endif %}
+  {# Forward anything not synthesized above. If apex_internal is false, prefer Cloudflare #}
+  {% if (coredns_apex_internal | default(true)) %}
+    {% set fwd = (coredns_forwarders | default([])) %}
+    {% if fwd | length > 0 %}
   forward . {{ fwd | join(' ') }}
-  {% else %}
+    {% else %}
   forward . /etc/resolv.conf
+    {% endif %}
+  {% else %}
+  forward . 1.1.1.1 1.0.0.1
   {% endif %}
   {% else %}
   # Mode 1: file-based authoritative zone
