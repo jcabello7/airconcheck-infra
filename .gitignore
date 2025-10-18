@@ -1,5 +1,6 @@
 # Ignore sensible files
 group_vars/secrets.yml
+group_vars/all.yml
 hosts
 
 
