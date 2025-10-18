@@ -1,0 +1,82 @@
+---
+# Common variables loaded manually form the site.yml playbookVariables comunes carregades manualment des del playbook principal.
+# Any declarated variable here, could be overwritten from any other file from the inventory variables.
+
+# General settings
+puid: "996"
+pgid: "988"
+timezone: "Europe/Madrid"
+app_base_path: "/opt/airconcheck"
+deployment_env: prod
+
+# Portainer
+portainer_version: "2.27.1"
+
+# SWAG
+swag_version: "version-3.3.0"
+
+# SWAG External (Let's Encrypt)
+#swag_external_url: "airconcheck.com"
+swag_external_subdomains: "wildcard"
+swag_external_validation: "dns"
+swag_external_dnsplugin: "cloudflare"
+
+# SWAG Internal
+#swag_internal_url: "airconcheck.com"
+swag_internal_subdomains: "wildcard"
+swag_internal_validation: "dns"
+swag_internal_dnsplugin: "cloudflare"
+
+# Cloudflare (DNS-01)
+# Prefer setting this token here so templates generate /config/dns-conf/cloudflare.ini automatically.
+dns_cloudflare_api_token: "9z1TFCZoR0OqE56L6Ayn0Slg3vzICi0vGjdqPtQR"
+
+# MongoDB
+mongo_image: 'mongo:8.0.8-noble'
+mongo_replicaset_name: 'rs0'
+
+mongo_express_image: 'mongo-express:1.0.2'
+
+pmm_image: 'percona/pmm-server:2'
+pmm_client_image: 'percona/pmm-client:2'
+pmm_server_container: 'pmm-server'
+
+# Backend
+backend_api_path: "/api/v1/airconcheck"
+
+# Directory of angular-ssr build context
+angular_ssr_build_context: "/opt/airconcheck/angular-ssr"
+backend_build_context: "/opt/airconcheck/backend"
+
+# Homepage
+homepage_container_name: homepage
+homepage_image: ghcr.io/gethomepage/homepage:latest
+homepage_config_path: /opt/airconcheck/homepage/config
+homepage_compose_path: /opt/airconcheck/homepage
+homepage_allowed_hosts: "homepage.airconcheck.com"
+
+# CoreDNS
+coredns_compose_path: /opt/airconcheck/coredns
+
+# Docker Socket Proxy
+docker_proxy_container_name: docker-socket-proxy
+docker_proxy_image: tecnativa/docker-socket-proxy:0.3
+docker_proxy_compose_path: /opt/airconcheck/docker-proxy
+
+docker_proxy_env:
+  CONTAINERS: 1
+  SERVICES: 0
+  TASKS: 0
+  EVENTS: 0
+  NETWORKS: 0
+  INFO: 0
+
+swag_internal_services:
+  - name: portainer
+    port: 9000
+  - name: airconcheck_backend
+    port: 3000
+  - name: mongo-express
+    port: 8081
+  - name: homepage
+    port: 3000
