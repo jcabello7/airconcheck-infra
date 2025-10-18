@@ -78,10 +78,12 @@
     src: templates/landpage/index.html.j2
     dest: "{{ global_defaults.app_base_path }}/landpage/html/index.html"
     owner: dockeruser
-    group: dockeruser
+    group: webcontent
     mode: "0644"
   when: deploy_landpage | default(false) and not (landpage_index.stat.exists | default(false))
   tags: [landpage]
+
+ 
 
 - name: Configurar SWAG
   import_tasks: configure_swag.yml
