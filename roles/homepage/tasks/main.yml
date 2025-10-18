@@ -8,11 +8,13 @@
   loop:
     - "{{ global_defaults.homepage_config_path }}"
     - "{{ global_defaults.homepage_compose_path }}"
+  tags: [homepage]
 
 - name: Template docker-compose.yml
   template:
     src: docker-compose.yml.j2
     dest: "{{ global_defaults.homepage_compose_path }}/docker-compose.yml"
+  tags: [homepage]
 
 
 - name: Template Homepage config files
@@ -25,9 +27,11 @@
     - { src: 'docker.yaml.j2',   dest: 'docker.yaml' }
     - { src: 'custom.css.j2',    dest: 'custom.css' }
   notify: restart homepage
+  tags: [homepage]
 
 
 - name: Run docker compose
   command: docker compose up -d
   args:
     chdir: "{{ global_defaults.homepage_compose_path }}"
+  tags: [homepage]

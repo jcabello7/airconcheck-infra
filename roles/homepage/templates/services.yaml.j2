@@ -1,20 +1,20 @@
+{# Precompute PROD dynamic item to avoid inline control statements breaking YAML lines #}
+{% set _prod_is_app = landpage_apex_enabled | default(false) %}
+{% set prod_item_name = 'App' if _prod_is_app else 'Landpage' %}
+{% set prod_item_icon = 'mdi-web' if _prod_is_app else 'si-nginx' %}
+{% set prod_item_href = 'https://app.airconcheck.com' if _prod_is_app else 'https://landpage.airconcheck.com' %}
+{% set prod_item_desc = 'Angular SSR (app)' if _prod_is_app else 'Landing pública' %}
+
 # Manually curated links per environment (rendered in top rows)
 - PROD-LINKS:
     - Principal:
         icon: mdi-web
         href: https://airconcheck.com
         description: Sitio principal
-    {% if landpage_apex_enabled | default(false) %}
-    - App:
-        icon: mdi-web
-        href: https://app.airconcheck.com
-        description: Angular SSR (app)
-    {% else %}
-    - Landpage:
-        icon: si-nginx
-        href: https://landpage.airconcheck.com
-        description: Landing pública
-    {% endif %}
+    - {{ prod_item_name }}:
+        icon: {{ prod_item_icon }}
+        href: {{ prod_item_href }}
+        description: {{ prod_item_desc }}
     - Portainer:
         icon: portainer.png
         href: https://portainer.airconcheck.com:8443
