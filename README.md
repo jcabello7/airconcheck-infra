@@ -65,6 +65,23 @@ Sensitive variables are stored in `group_vars/secrets.yml`, which is ignored by 
 ```bash
 cp group_vars/secrets.yml.example group_vars/secrets.yml
 vim group_vars/secrets.yml
+```
+
+You can also use the included Makefile helpers:
+
+```bash
+# Create secrets.yml from example if missing
+make secrets-init
+
+# Check status (plain/encrypted/missing)
+make secrets-status
+
+# Encrypt, edit, view, or rekey with Ansible Vault
+make secrets-encrypt
+make secrets-edit
+make secrets-view
+make secrets-rekey
+```
 
 ---
 
