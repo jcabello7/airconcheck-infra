@@ -1,0 +1,21 @@
+---
+# Defaults for the access_control role
+
+# Groups to ensure exist on the target system
+access_control_groups:
+  - webcontent
+  - infra
+
+# Users to manage. Prefer setting this in group_vars/secrets.yml (vaulted).
+# Each item can have:
+# - name: username (required)
+# - groups: [list of supplementary groups] (optional)
+# - public_keys: [list of SSH public keys to authorize] (optional)
+# - generate_keypair: bool to generate an ed25519 key on the host if true (optional)
+access_control_users: []
+
+# Whether to fetch generated private keys back to the controller (only for generated keypairs)
+access_control_fetch_private_keys: true
+
+# Destination directory on the controller for fetched keys
+access_control_fetch_output_dir: "{{ playbook_dir }}/../output/ssh-keys/{{ inventory_hostname }}"

@@ -1,0 +1,224 @@
+---
+# Manage groups, users, SSH keys, ACLs, and cleanup
+
+- name: Load global defaults without overwriting environment-specific vars
+  include_vars:
+    file: "{{ playbook_dir }}/../group_vars/all.yml"
+    name: global_defaults
+  tags: [access_control]
+
+- name: Ensure required packages for ACLs and ssh keygen are present
+  apt:
+    name:
+      - acl
+      - openssh-client
+    state: present
+    update_cache: yes
+  tags: [access_control]
+
+- name: Ensure groups exist
+  group:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ access_control_groups }}"
+  tags: [access_control]
+
+- name: Ensure users exist
+  user:
+    name: "{{ item.name }}"
+    state: present
+    shell: "/bin/bash"
+    groups: "{{ (item.groups | default([])) | join(',') if (item.groups | default([])) | length > 0 else omit }}"
+    append: yes
+    create_home: yes
+  loop: "{{ access_control_users }}"
+  tags: [access_control]
+
+- name: Compute users needing SSH setup
+  set_fact:
+    users_needing_ssh: >-
+      {{ (
+            access_control_users | selectattr('public_keys','defined') | map(attribute='name') | list
+         )
+         +
+         (
+            access_control_users | selectattr('generate_keypair','defined') | selectattr('generate_keypair') | map(attribute='name') | list
+         )
+         | unique }}
+  tags: [access_control]
+
+- name: Ensure .ssh directory permissions
+  file:
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0700"
+  loop: "{{ users_needing_ssh | default([]) }}"
+  tags: [access_control]
+
+- name: Generate SSH key pairs for users requesting generation
+  openssh_keypair:
+    path: "/home/{{ item.name }}/.ssh/id_ed25519"
+    type: ed25519
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0600"
+  loop: "{{ access_control_users | selectattr('generate_keypair','defined') | selectattr('generate_keypair') | list }}"
+  register: generated_keypairs
+  tags: [access_control]
+
+- name: Build dict of generated public keys
+  set_fact:
+    generated_public_keys: >-
+      {{ dict(
+          (generated_keypairs.results | default([]))
+          | selectattr('public_key','defined')
+          | map(attribute='item.name') | list
+          | zip(
+              (generated_keypairs.results | default([]))
+              | selectattr('public_key','defined')
+              | map(attribute='public_key') | list
+          )
+        ) }}
+  tags: [access_control]
+
+- name: Authorize provided public keys for SSH login
+  authorized_key:
+    user: "{{ item.0.name }}"
+    state: present
+    key: "{{ item.1 }}"
+  loop: "{{ access_control_users | subelements('public_keys', skip_missing=True) }}"
+  tags: [access_control]
+
+- name: Authorize generated public keys for SSH login
+  authorized_key:
+    user: "{{ item.item.name }}"
+    state: present
+    key: "{{ item.public_key }}"
+  loop: "{{ (generated_keypairs.results | default([])) | selectattr('public_key','defined') | list }}"
+  tags: [access_control]
+
+# Collect private keys so we can present them in the play recap (encrypted fact)
+
+- name: Ensure local output directory exists (control host)
+  delegate_to: localhost
+  run_once: true
+  become: false
+  file:
+    path: "{{ access_control_fetch_output_dir }}"
+    state: directory
+    mode: "0700"
+  tags: [access_control]
+
+- name: Fetch private keys to control host securely
+  fetch:
+    src: "/home/{{ item }}/.ssh/id_ed25519"
+    dest: "{{ access_control_fetch_output_dir }}/{{ item }}_id_ed25519"
+    flat: true
+    fail_on_missing: false
+    validate_checksum: true
+  loop: "{{ (generated_keypairs.results | default([])) | selectattr('public_key','defined') | map(attribute='item.name') | list | unique }}"
+  when: access_control_fetch_private_keys | bool
+  tags: [access_control]
+
+# Apply ACLs for content directories to allow webcontent full rwx
+- name: Ensure content directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: dockeruser
+    group: dockeruser
+    mode: "0755"
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+- name: Grant default ACLs for webcontent (rwx)
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "webcontent"
+    etype: group
+    permissions: rwx
+    state: present
+    default: yes
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+- name: Set effective ACLs for webcontent (rwx) on existing dirs
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "webcontent"
+    etype: group
+    permissions: rwx
+    state: present
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+- name: Ensure mask allows group rwx on content directories (default ACL)
+  ansible.posix.acl:
+    path: "{{ item }}"
+    etype: mask
+    permissions: rwx
+    state: present
+    default: yes
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+- name: Ensure mask allows group rwx on content directories (effective)
+  ansible.posix.acl:
+    path: "{{ item }}"
+    etype: mask
+    permissions: rwx
+    state: present
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+# infra group: rwx over the entire /opt/airconcheck
+- name: Grant infra group ACL (rwx) on app base path (default)
+  ansible.posix.acl:
+    path: "{{ global_defaults.app_base_path }}"
+    entity: infra
+    etype: group
+    permissions: rwx
+    state: present
+    default: yes
+    recursive: yes
+  tags: [access_control]
+
+- name: Grant infra group ACL (rwx) on app base path (effective)
+  ansible.posix.acl:
+    path: "{{ global_defaults.app_base_path }}"
+    entity: infra
+    etype: group
+    permissions: rwx
+    state: present
+    recursive: yes
+  tags: [access_control]
+
+# Cleanup unused directories
+- name: Remove unused directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ global_defaults.app_base_path }}/frontend"
+  tags: [access_control]

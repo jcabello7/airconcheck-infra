@@ -46,6 +46,7 @@
     - ansible_user
     - express
     - docker
+    - access_control
     - { role: coredns, when: coredns_enabled | default(false) }
     - angular
     - mongo_jumpbox

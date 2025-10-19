@@ -1,3 +1,4 @@
+output/
 # Ignore sensible files
 group_vars/secrets.yml
 hosts

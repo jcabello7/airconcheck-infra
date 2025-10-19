@@ -1,0 +1,44 @@
+---
+- name: Fix broken dpkg state on dev (purge incorrect EFI boot packages on BIOS systems)
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Detect UEFI presence
+      ansible.builtin.stat:
+        path: /sys/firmware/efi
+      register: efi
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Purge grub-efi-amd64-signed and shim-signed on non-UEFI systems
+      ansible.builtin.apt:
+        name:
+          - grub-efi-amd64-signed
+          - shim-signed
+        state: absent
+        purge: true
+        autoremove: true
+        force_apt_get: true
+      when:
+        - not efi.stat.exists
+        - ("grub-efi-amd64-signed" in ansible_facts.packages) or ("shim-signed" in ansible_facts.packages)
+
+    - name: Attempt to fix broken installs (apt-get -f install)
+      ansible.builtin.shell: |
+        DEBIAN_FRONTEND=noninteractive apt-get -y \
+          -o Dpkg::Options::=--force-confdef \
+          -o Dpkg::Options::=--force-confold \
+          -f install
+      register: fix_output
+      changed_when: fix_output.rc == 0 and (fix_output.stdout | length > 0)
+      failed_when: fix_output.rc != 0
+
+    - name: Configure any unpacked packages (dpkg --configure -a)
+      ansible.builtin.shell: dpkg --configure -a
+      register: dpkg_conf
+      changed_when: dpkg_conf.rc == 0 and (dpkg_conf.stdout | length > 0)
+      failed_when: dpkg_conf.rc != 0

@@ -66,21 +66,14 @@
     mode: '0755'
   loop: "{{ app_directories }}"
 
-- name: Check if landpage index.html exists
-  stat:
-    path: "{{ global_defaults.app_base_path }}/landpage/html/index.html"
-  register: landpage_index
-  when: deploy_landpage | default(false)
-  tags: [landpage]
-
-- name: Render default landpage index.html (if missing)
+- name: Render landpage index.html from template (Ansible-managed)
   template:
     src: templates/landpage/index.html.j2
     dest: "{{ global_defaults.app_base_path }}/landpage/html/index.html"
     owner: dockeruser
-    group: webcontent
+    group: dockeruser
     mode: "0644"
-  when: deploy_landpage | default(false) and not (landpage_index.stat.exists | default(false))
+  when: deploy_landpage | default(false)
   tags: [landpage]
 
  
