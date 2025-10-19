@@ -3,6 +3,7 @@
 #  include_vars:
 #    file: "{{ playbook_dir }}/../group_vars/all.yml"
 - import_tasks: load_globals.yml
+  tags: [always]
 
 - name: Delete docker snap
   command: snap remove docker
@@ -66,14 +67,21 @@
     mode: '0755'
   loop: "{{ app_directories }}"
 
-- name: Render landpage index.html from template (Ansible-managed)
+- name: Check if landpage index.html already exists
+  stat:
+    path: "{{ global_defaults.app_base_path }}/landpage/html/index.html"
+  register: landpage_index_stat
+  when: deploy_landpage | default(false)
+  tags: [landpage]
+
+- name: Render landpage index.html from template (only if absent)
   template:
     src: templates/landpage/index.html.j2
     dest: "{{ global_defaults.app_base_path }}/landpage/html/index.html"
     owner: dockeruser
     group: dockeruser
-    mode: "0644"
-  when: deploy_landpage | default(false)
+    mode: "0664"
+  when: deploy_landpage | default(false) and not (landpage_index_stat.stat.exists | default(false))
   tags: [landpage]
 
  

@@ -7,13 +7,40 @@
     name: global_defaults
   tags: [access_control]
 
-- name: Ensure required packages for ACLs and ssh keygen are present
+- name: Check for setfacl (acl) availability
+  command: which setfacl
+  register: setfacl_check
+  changed_when: false
+  failed_when: false
+  tags: [access_control]
+
+- name: Check for ssh-keygen availability
+  command: which ssh-keygen
+  register: ssh_keygen_check
+  changed_when: false
+  failed_when: false
+  tags: [access_control]
+
+- name: Determine if any users require keypair generation
+  set_fact:
+    users_requesting_keygen: "{{ access_control_users | selectattr('generate_keypair','defined') | selectattr('generate_keypair') | list }}"
+  tags: [access_control]
+
+- name: Build package install list (only if required)
+  set_fact:
+    packages_to_install: >-
+      {{ []
+         | union(['acl'] if (setfacl_check.rc | default(1)) != 0 else [])
+         | union(['openssh-client'] if ((users_requesting_keygen | length) > 0 and (ssh_keygen_check.rc | default(1)) != 0) else [])
+      }}
+  tags: [access_control]
+
+- name: Ensure required packages for ACLs and ssh keygen are present (conditional)
   apt:
-    name:
-      - acl
-      - openssh-client
+    name: "{{ packages_to_install }}"
     state: present
     update_cache: yes
+  when: packages_to_install | length > 0
   tags: [access_control]
 
 - name: Ensure groups exist
@@ -129,7 +156,7 @@
     state: directory
     owner: dockeruser
     group: dockeruser
-    mode: "0755"
+    mode: "0775"
   loop:
     - "{{ global_defaults.app_base_path }}/landpage/html"
     - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
@@ -151,10 +178,53 @@
     - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
   tags: [access_control]
 
+- name: Grant default ACLs for infra (rwx)
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "infra"
+    etype: group
+    permissions: rwx
+    state: present
+    default: yes
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+- name: Ensure default mask allows group rwx on content directories
+  ansible.posix.acl:
+    path: "{{ item }}"
+    etype: mask
+    permissions: rwx
+    state: present
+    default: yes
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
 - name: Set effective ACLs for webcontent (rwx) on existing dirs
   ansible.posix.acl:
     path: "{{ item }}"
     entity: "webcontent"
+    etype: group
+    permissions: rwx
+    state: present
+    recursive: yes
+  loop:
+    - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
+    - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
+  tags: [access_control]
+
+- name: Set effective ACLs for infra (rwx) on existing dirs
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "infra"
     etype: group
     permissions: rwx
     state: present

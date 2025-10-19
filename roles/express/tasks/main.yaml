@@ -2,7 +2,7 @@
   file:
     path: "{{ global_defaults.app_base_path }}/backend"
     state: directory
-    mode: '0755'
+    mode: '0775'
 
 - name: Crear .env per al backend (Express)
   template:
