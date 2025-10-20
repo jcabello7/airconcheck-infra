@@ -127,6 +127,7 @@ services:
     restart: unless-stopped
     networks:
       - proxy
+      - internal_db
 {% endif %}
 
 
