@@ -351,6 +351,14 @@ BACKEND_URL=<backend_api_host><backend_api_path>
 ```
 Adjust `backend_api_host` in `inventories/<env>/group_vars/<env>.yml` if you customize domains.
 
+To prevent overwriting your existing backend `.env` on each playbook run, use:
+
+```yaml
+# group_vars/all.yml (default)
+backend_env_overwrite: false  # Only create if missing; don't overwrite
+```
+Set it to `true` if you want Ansible to re-render `.env` every run.
+
 ---
 
 ## 🔗 Docker Network Diagram (including backend)

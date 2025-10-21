@@ -48,6 +48,11 @@ backend_api_path: "/api/v1/airconcheck"
 # Default: disabled, since backend is now exposed externally at api.<env-domain>
 expose_backend_internally: false
 
+# Backend .env management
+# If true, the backend .env will be re-templated on every run.
+# If false, it will only be created if missing (no overwrite).
+backend_env_overwrite: false
+
 # Directory of angular-ssr build context
 angular_ssr_build_context: "/opt/airconcheck/angular-ssr"
 backend_build_context: "/opt/airconcheck/backend"

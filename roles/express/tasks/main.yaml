@@ -4,11 +4,17 @@
     state: directory
     mode: '0775'
 
+- name: Comprobar si existe .env del backend
+  stat:
+    path: "{{ global_defaults.app_base_path }}/backend/.env"
+  register: backend_env_stat
+
 - name: Crear .env per al backend (Express)
   template:
     src: backend.env.j2
     dest: "{{ global_defaults.app_base_path }}/backend/.env"
     mode: "0644"
+  when: (backend_env_overwrite | default(false)) or (not backend_env_stat.stat.exists | default(false))
 
 - name: Copiar build del backend (si no es fa build in-place)
   copy:
