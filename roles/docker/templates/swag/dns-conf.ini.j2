@@ -1,7 +1,7 @@
 # Instructions: https://github.com/certbot/certbot/blob/master/certbot-dns-cloudflare/certbot_dns_cloudflare/__init__.py#L20
 # Provided by Ansible. Prefer `dns_cloudflare_api_token` and fallback to legacy `cloudflare_api_token`.
 
-{% set cf_token = (dns_cloudflare_api_token if (dns_cloudflare_api_token is defined and (dns_cloudflare_api_token | length) > 0) else cloudflare_api_token) %}
+{% set cf_token = dns_cloudflare_api_token | default(cloudflare_api_token | default(global_defaults.dns_cloudflare_api_token | default(global_defaults.cloudflare_api_token | default('')))) %}
 
 # Token-based auth (recommended)
 dns_cloudflare_api_token = {{ cf_token }}

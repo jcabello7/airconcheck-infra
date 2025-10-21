@@ -11,15 +11,15 @@ angular_ssr_copy_build: false
 expose_backend_port: false
 
 # Expose backend to the SWAG-internal proxy
-deploy_backend: false
+deploy_backend: true
 deploy_landpage: true
 
 # Base domain URLs
 swag_external_url: "test.airconcheck.com"
 swag_internal_url: "test.airconcheck.com"
 
-# Backend
-backend_api_host: "http://backend:3000"
+# Backend (external API)
+backend_api_host: "https://api.test.airconcheck.com"
 
 # Homepage
 homepage_allowed_hosts: "homepage.test.airconcheck.com"

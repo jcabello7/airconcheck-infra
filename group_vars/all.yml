@@ -44,6 +44,10 @@ pmm_server_container: 'pmm-server'
 # Backend
 backend_api_path: "/api/v1/airconcheck"
 
+# Internal exposure for Backend via SWAG (internal)
+# Default: disabled, since backend is now exposed externally at api.<env-domain>
+expose_backend_internally: false
+
 # Directory of angular-ssr build context
 angular_ssr_build_context: "/opt/airconcheck/angular-ssr"
 backend_build_context: "/opt/airconcheck/backend"

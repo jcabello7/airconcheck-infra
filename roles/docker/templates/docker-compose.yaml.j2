@@ -141,12 +141,13 @@ services:
       - homepage.group={{ deployment_env | upper }}
       - homepage.name=Backend API
       - homepage.icon=mdi-nodejs
-      - homepage.href=https://backend.{{ swag_internal_url }}:8443
+      - homepage.href=https://api.{{ swag_external_url }}
       - homepage.description=Express API service
     env_file:
       - {{ global_defaults.backend_build_context }}/.env
     networks:
       - internal_db
+      - proxy
     environment:
       MONGO_URL: "{{ mongo_app_url }}"
     healthcheck:

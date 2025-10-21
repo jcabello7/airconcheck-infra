@@ -18,8 +18,8 @@ deploy_landpage: true
 swag_external_url: "dev.airconcheck.com"
 swag_internal_url: "dev.airconcheck.com"
 
-# Backend
-backend_api_host: "https://backend.dev.airconcheck.com:8443"
+# Backend (external API)
+backend_api_host: "https://api.dev.airconcheck.com"
 
 # Homepage
 homepage_allowed_hosts: "homepage.dev.airconcheck.com"

@@ -32,27 +32,37 @@ ansible-playbook playbooks/debug-vars.yml -i inventories/test/
 
 ---
 
-## 📦 Currently Deployed Containers
+## 📦 Deployed Containers
 
 | Service         | Image                           | Ports             | Description                     |
-|------------------|----------------------------------|--------------------|---------------------------------|
-| angular-ssr      | node:20 + build SSR             | 4000 (internal)    | Frontend Angular SSR            |
-| landpage         | nginx:alpine                    | 80 (internal)      | Static landing page (public)    |
-| portainer        | portainer/portainer-ce:2.27.1   | 9000               | Docker UI                       |
-| swag-external    | linuxserver/swag:3.3.0          | 443                | Public-facing reverse proxy     |
-| swag-internal    | linuxserver/swag:3.3.0          | 8443               | Internal services via VPN/CF    |
-| mongodb          | mongo:7                         | 27017              | Primary database                |
+|-----------------|---------------------------------|-------------------|---------------------------------|
+| angular-ssr     | node:20 + build SSR             | 4000 (internal)   | Frontend Angular SSR            |
+| landpage        | nginx:alpine                    | 80 (internal)     | Static landing page (public via SWAG) |
+| portainer       | portainer/portainer-ce:2.27.1   | 9000              | Docker UI                       |
+| swag-external   | linuxserver/swag:3.3.0          | 443, 80           | Public-facing reverse proxy     |
+| swag-internal   | linuxserver/swag:3.3.0          | 8443              | Internal reverse proxy          |
+| backend         | node:20 (Express)               | 3000 (internal)   | Backend API (served via SWAG)   |
+| mongodb         | mongo:8.0.8-noble               | 27017-27019       | MongoDB replica set             |
 
 ---
 
 ## 🌍 URLs per Environment
 
-| Environment | URL                                      | Service           |
-|-------------|-------------------------------------------|--------------------|
-| prod        | https://airconcheck.com                  | Angular SSR (or Landpage if toggle) |
-| test        | https://test.airconcheck.com             | Angular SSR (test) |
-| prod        | https://portainer.airconcheck.com:8443   | Portainer (internal) |
-| test        | https://portainer.test.airconcheck.com:8443 | Portainer (internal test) |
+Public endpoints (via swag-external):
+
+| Environment | Frontend                        | Landpage                            | API                         |
+|-------------|---------------------------------|-------------------------------------|-----------------------------|
+| prod        | https://airconcheck.com or https://app.airconcheck.com (toggle) | https://airconcheck.com or https://landpage.airconcheck.com | https://api.airconcheck.com |
+| test        | https://test.airconcheck.com    | https://landpage.test.airconcheck.com | https://api.test.airconcheck.com |
+| dev         | https://dev.airconcheck.com     | https://landpage.dev.airconcheck.com  | https://api.dev.airconcheck.com  |
+
+Internal endpoints (via swag-internal):
+
+| Environment | Portainer                                   | Homepage                                   | Notes |
+|-------------|---------------------------------------------|--------------------------------------------|-------|
+| prod        | https://portainer.airconcheck.com:8443      | https://homepage.airconcheck.com:8443      |       |
+| test        | https://portainer.test.airconcheck.com:8443 | https://homepage.test.airconcheck.com:8443 |       |
+| dev         | https://portainer.dev.airconcheck.com:8443  | https://homepage.dev.airconcheck.com:8443  |       |
 
 ---
 
@@ -91,17 +101,19 @@ make secrets-rekey
 ![Network Diagram](docs/docker-network.png)
 [proxy]
  ├─ angular-ssr (4000)
- └─ swag-external (443)
-     ↑ public endpoint
+ ├─ backend (3000)
+ └─ swag-external (443/80)
+   ↑ public endpoints (wildcard certs)
 
 [internal_db]
  ├─ angular-ssr
- └─ mongodb (27017)
+ ├─ backend
+ └─ mongodb (27017-27019)
 
 [management]
  ├─ portainer (9000)
  └─ swag-internal (8443)
-     ↑ private endpoint
+   ↑ private endpoints
      
 ---
 
@@ -282,43 +294,48 @@ Happy hacking!
 | Container            | Ports                  | Networks           | Notes                                             |
 |---------------------|------------------------|--------------------|---------------------------------------------------|
 | portainer           | 9000 (internal only)   | management         | Web UI for Docker                                 |
-| swag-external       | 443, 80                | proxy              | External reverse proxy with Let's Encrypt        |
-| swag-internal       | 8443                   | management         | Internal reverse proxy (VPN-only access)         |
-| angular-ssr         | 4000                   | proxy, internal_db | Angular frontend (SSR) served via SWAG           |
-| airconcheck_backend | 3000 (only in test)    | proxy, internal_db | Node.js Express backend API                      |
-| airconcheck_mongodb | —                      | internal_db        | MongoDB database                                  |
+| swag-external       | 443, 80                | proxy              | External reverse proxy with Let's Encrypt         |
+| swag-internal       | 8443                   | management         | Internal reverse proxy (VPN-only access)          |
+| angular-ssr         | 4000                   | proxy, internal_db | Angular frontend (SSR) served via SWAG            |
+| backend             | 3000                   | proxy, internal_db | Node.js Express backend API (via api.<env>)       |
+| mongodb             | 27017-27019            | internal_db        | MongoDB database                                  |
 
 ## 🌍 URLs per Environment
 
-| Environment | Frontend URL                        | Backend URL                          |
-|-------------|-------------------------------------|--------------------------------------|
-| Test        | https://test.airconcheck.com        | https://api.test.airconcheck.com:8443 + `localhost:3000` |
-| Production  | https://airconcheck.com             | *Not exposed*                        |
+| Environment | Frontend URL                 | Backend URL                  |
+|-------------|------------------------------|------------------------------|
+| Dev         | https://dev.airconcheck.com  | https://api.dev.airconcheck.com  |
+| Test        | https://test.airconcheck.com | https://api.test.airconcheck.com |
+| Production  | https://airconcheck.com      | https://api.airconcheck.com      |
 
 ---
 
-## 🚀 Deployed Containers: Backend
+## 🚀 Backend Service
 
 The backend is a Node.js Express service used to serve the main API consumed by the Angular frontend.
 
 | Container         | Ports       | Networks                | Notes                                 |
 |------------------|-------------|--------------------------|---------------------------------------|
-| airconcheck_backend | 3000 (only in test) | proxy, internal_db      | Built from `/opt/airconcheck/backend` |
+| backend            | 3000               | proxy, internal_db      | Built from `/opt/airconcheck/backend` |
 
 ---
 
-## 🌍 URLs per Environment
+### Access
 
-| Environment | URL                              | Notes                       |
-|-------------|----------------------------------|-----------------------------|
-| Test        | https://api.test.airconcheck.com:8443 | Routed via swag-internal   |
-| Production  | *Not exposed*                    | Backend only used internally |
+- Public API: `https://api.<env>.airconcheck.com`
+- Optional debug: bind host port 3000 by setting `expose_backend_port: true` in the environment inventory.
 
-In the test environment, the backend is also accessible via port `3000` on the host (`localhost:3000`) for debugging if `expose_backend_port: true` is set.
+Internal exposure via `swag-internal` is disabled by default. To enable the legacy internal hostname `backend.<env>.airconcheck.com:8443`, set:
+
+```yaml
+expose_backend_internally: true
+```
+
+This will render `/config/nginx/proxy-confs/backend.subdomain.conf` under the internal SWAG config.
 
 ---
 
-## 🔐 Secrets Management
+## 🔐 Backend Secrets and Env
 
 For backend access to MongoDB, ensure the `.env` file at `/opt/airconcheck/backend/.env` includes:
 
@@ -326,12 +343,29 @@ For backend access to MongoDB, ensure the `.env` file at `/opt/airconcheck/backe
 MONGO_URL=mongodb://<user>:<pass>@mongodb:27017
 ```
 
-This can be templated from Ansible using `backend.env.j2` and injected per environment.
+This is templated from Ansible using `roles/express/templates/backend.env.j2` and injected per environment. It includes:
+
+```
+FRONTEND_URL=https://<env-domain>
+BACKEND_URL=<backend_api_host><backend_api_path>
+```
+Adjust `backend_api_host` in `inventories/<env>/group_vars/<env>.yml` if you customize domains.
 
 ---
 
 ## 🔗 Docker Network Diagram (including backend)
 
 - `backend` is connected to:
-  - `proxy`: for access from swag-internal
+  - `proxy`: for access from swag-external (and optional swag-internal)
   - `internal_db`: to communicate with `mongodb`
+
+## ⚙️ Cloudflare DNS-01 token
+
+SWAG uses the Cloudflare DNS plugin for wildcard certificates. The token is resolved with the following precedence (first non-empty wins):
+
+1. `dns_cloudflare_api_token`
+2. `cloudflare_api_token`
+3. `global_defaults.dns_cloudflare_api_token`
+4. `global_defaults.cloudflare_api_token`
+
+Ansible will generate `/config/dns-conf/cloudflare.ini` for both external and internal SWAG instances when `DNSPLUGIN=cloudflare`.
