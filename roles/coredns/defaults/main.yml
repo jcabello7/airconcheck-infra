@@ -14,6 +14,12 @@ coredns_forwarders:
   - 1.1.1.1
   - 9.9.9.9
 
+# Domains that should bypass local answers and always forward upstream
+coredns_passthrough_domains: []
+
+# Optional override for passthrough forwarders (defaults to coredns_forwarders)
+coredns_passthrough_forwarders: []
+
 # Zones to serve. Example:
 # coredns_zones:
 #   - zone: dev.airconcheck.com

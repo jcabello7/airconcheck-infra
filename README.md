@@ -155,6 +155,8 @@ coredns_zones:
 - `coredns_bind_ip` (string, optional): IP to bind for DNS. If empty, auto-detected from `tailscale0`.
 - `coredns_forwarders` (list): upstream DNS servers for non-authoritative queries. If empty/omitted, CoreDNS falls back to `/etc/resolv.conf`.
 - `coredns_compose_path` (string): where CoreDNS files live on the host (default derives from `global_defaults.app_base_path`).
+- `coredns_passthrough_domains` (list): FQDNs that must bypass local answers and are always forwarded upstream (for example, `mail.airconcheck.com`).
+- `coredns_passthrough_forwarders` (list, optional): override forwarders for passthrough domains; defaults to `coredns_forwarders` when empty.
 - `coredns_zones` (list): the per-environment DNS zones and records to serve.
 
 `coredns_zones` schema:
@@ -221,6 +223,7 @@ Esto permite que un cambio de IP pública se refleje automáticamente al actuali
   - PROD: controlado por `landpage_apex_enabled` en `inventories/prod/group_vars/prod.yml`.
     - `true`: `airconcheck.com` apunta a Landpage y `angular-ssr` pasa a `app.airconcheck.com`.
     - `false`: Landpage en `landpage.airconcheck.com` y `angular-ssr` permanece en `airconcheck.com`.
+  - Nginx sirve la SPA usando `try_files` (templado en `/opt/airconcheck/landpage/nginx/default.conf`).
 
 Variables de inventario relevantes:
 

@@ -34,6 +34,8 @@ swag_internal_services:
 # Modo: wildcard synth para *.airconcheck.com hacia Tailscale y forward del resto (apex via Internet)
 
 coredns_enabled: true
+coredns_passthrough_domains:
+  - mail.airconcheck.com
 coredns_zones:
   - zone: airconcheck.com
     wildcard_to: TAILSCALE_SELF
@@ -42,7 +44,7 @@ coredns_zones:
 # a la IP interna de Tailscale. Si false, el apex se resolverá a través de
 # Cloudflare (1.1.1.1/1.0.0.1), mientras que los subdominios (*.airconcheck.com)
 # seguirán apuntando a Tailscale.
-coredns_apex_internal: true
+coredns_apex_internal: false
 
 # Landpage in prod: if true, landpage serves apex (airconcheck.com) and angular-ssr moves to app.airconcheck.com
 landpage_apex_enabled: true

@@ -1,0 +1,26 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(?:js|css|map|png|jpe?g|gif|svg|ico|woff2?|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public";
+        try_files $uri =404;
+    }
+
+    # EXACT MATCH para robots.txt
+    location = /robots.txt {
+        try_files $uri =404;
+        access_log off;
+        log_not_found off;
+    }
+
+}

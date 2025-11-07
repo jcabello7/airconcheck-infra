@@ -31,6 +31,8 @@ swag_internal_services:
 
 # CoreDNS enabled by default in test
 coredns_enabled: true
+coredns_passthrough_domains:
+  - mail.airconcheck.com
 coredns_zones:
   - zone: test.airconcheck.com
     records:

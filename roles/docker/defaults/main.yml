@@ -24,3 +24,4 @@ app_directories:
   - "{{ global_defaults.app_base_path }}/swag/internal/dns-conf"
   - "{{ global_defaults.app_base_path }}/landpage"
   - "{{ global_defaults.app_base_path }}/landpage/html"
+  - "{{ global_defaults.app_base_path }}/landpage/nginx"

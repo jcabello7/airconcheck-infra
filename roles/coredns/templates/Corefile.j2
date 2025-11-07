@@ -4,6 +4,18 @@
   ready
 }
 
+{% set passthrough_forwarders = coredns_passthrough_forwarders | default([]) %}
+{% set passthrough_targets = passthrough_forwarders if (passthrough_forwarders | length > 0) else (coredns_forwarders | default([])) %}
+{% for domain in coredns_passthrough_domains | default([]) %}
+{{ domain }}:53 {
+  {% if passthrough_targets | length > 0 %}
+  forward . {{ passthrough_targets | join(' ') }}
+  {% else %}
+  forward . /etc/resolv.conf
+  {% endif %}
+}
+
+{% endfor %}
 {% for z in coredns_zones %}
 {{ z.zone }}:53 {
   {% if z.wildcard_to is defined %}

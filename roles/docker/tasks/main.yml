@@ -84,6 +84,16 @@
   when: deploy_landpage | default(false) and not (landpage_index_stat.stat.exists | default(false))
   tags: [landpage]
 
+- name: Render landpage nginx default.conf (SPA fallback)
+  template:
+    src: templates/landpage/default.conf.j2
+    dest: "{{ global_defaults.app_base_path }}/landpage/nginx/default.conf"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0644"
+  when: deploy_landpage | default(false)
+  tags: [landpage]
+
  
 
 - name: Configurar SWAG
