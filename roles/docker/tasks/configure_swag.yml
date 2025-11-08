@@ -117,6 +117,23 @@
   notify: restart swag-external
   tags: [landpage]
 
+- name: Crear redirección SWAG EXTERNAL para www → apex
+  template:
+    src: swag-site-confs/www-redirect.subdomain.conf.j2
+    dest: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/www-redirect.subdomain.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart swag-external
+  tags: [landpage]
+
+- name: Retirar redirección legacy www-redirect.conf
+  file:
+    path: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/www-redirect.conf"
+    state: absent
+  notify: restart swag-external
+  tags: [landpage]
+
 - name: Eliminar configuración SWAG EXTERNAL de landpage si no se despliega
   file:
     path: "{{ global_defaults.app_base_path }}/swag/external/nginx/proxy-confs/landpage.subdomain.conf"

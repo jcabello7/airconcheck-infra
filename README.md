@@ -224,6 +224,7 @@ Esto permite que un cambio de IP pública se refleje automáticamente al actuali
     - `true`: `airconcheck.com` apunta a Landpage y `angular-ssr` pasa a `app.airconcheck.com`.
     - `false`: Landpage en `landpage.airconcheck.com` y `angular-ssr` permanece en `airconcheck.com`.
   - Nginx sirve la SPA usando `try_files` (templado en `/opt/airconcheck/landpage/nginx/default.conf`).
+  - `www.<dominio>` redirige automáticamente al apex vía SWAG (`www-redirect.subdomain.conf`).
 
 Variables de inventario relevantes:
 

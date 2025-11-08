@@ -1,0 +1,17 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.{{ swag_external_url }};
+    return 301 https://{{ swag_external_url }}$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    server_name www.{{ swag_external_url }};
+
+    include /config/nginx/ssl.conf;
+
+    return 301 https://{{ swag_external_url }}$request_uri;
+}
