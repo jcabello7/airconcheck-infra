@@ -12,6 +12,7 @@ expose_backend_port: false
 
 # Expose backend to the SWAG-internal proxy
 deploy_backend: true
+deploy_angular_ssr: true
 deploy_landpage: true
 
 # Base domain URLs
