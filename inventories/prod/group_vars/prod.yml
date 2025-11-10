@@ -36,6 +36,7 @@ swag_internal_services:
 coredns_enabled: true
 coredns_passthrough_domains:
   - mail.airconcheck.com
+  - api.airconcheck.com
 coredns_zones:
   - zone: airconcheck.com
     wildcard_to: TAILSCALE_SELF
