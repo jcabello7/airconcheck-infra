@@ -27,10 +27,6 @@ swag_internal_subdomains: "wildcard"
 swag_internal_validation: "dns"
 swag_internal_dnsplugin: "cloudflare"
 
-# Cloudflare (DNS-01)
-# Prefer setting this token here so templates generate /config/dns-conf/cloudflare.ini automatically.
-dns_cloudflare_api_token: "9z1TFCZoR0OqE56L6Ayn0Slg3vzICi0vGjdqPtQR"
-
 # MongoDB
 mongo_image: 'mongo:8.0.8-noble'
 mongo_replicaset_name: 'rs0'
@@ -64,6 +60,11 @@ homepage_config_path: /opt/airconcheck/homepage/config
 homepage_compose_path: /opt/airconcheck/homepage
 homepage_allowed_hosts: "homepage.airconcheck.com"
 
+# Monitoring
+deploy_netdata: true
+netdata_dbengine_disk_space_mb: 4096
+netdata_page_cache_size_mb: 128
+
 # CoreDNS
 coredns_compose_path: /opt/airconcheck/coredns
 
@@ -78,7 +79,7 @@ docker_proxy_env:
   TASKS: 0
   EVENTS: 0
   NETWORKS: 0
-  INFO: 0
+  INFO: 1
 
 swag_internal_services:
   - name: portainer
@@ -89,3 +90,5 @@ swag_internal_services:
     port: 8081
   - name: homepage
     port: 3000
+  - name: netdata
+    port: 19999

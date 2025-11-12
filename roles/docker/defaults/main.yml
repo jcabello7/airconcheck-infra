@@ -25,3 +25,7 @@ app_directories:
   - "{{ global_defaults.app_base_path }}/landpage"
   - "{{ global_defaults.app_base_path }}/landpage/html"
   - "{{ global_defaults.app_base_path }}/landpage/nginx"
+  - "{{ global_defaults.app_base_path }}/netdata"
+  - "{{ global_defaults.app_base_path }}/netdata/config"
+  - "{{ global_defaults.app_base_path }}/netdata/lib"
+  - "{{ global_defaults.app_base_path }}/netdata/cache"

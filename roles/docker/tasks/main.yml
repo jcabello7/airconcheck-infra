@@ -94,6 +94,15 @@
   when: deploy_landpage | default(false)
   tags: [landpage]
 
+- name: Render Netdata configuration (persistent dbengine)
+  template:
+    src: templates/netdata/netdata.conf.j2
+    dest: "{{ global_defaults.app_base_path }}/netdata/config/netdata.conf"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0644"
+  when: deploy_netdata | default(true)
+
  
 
 - name: Configurar SWAG

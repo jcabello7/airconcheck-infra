@@ -29,6 +29,8 @@ homepage_allowed_hosts: "homepage.dev.airconcheck.com"
 swag_internal_services:
   - name: portainer
     port: 9000
+  - name: netdata
+    port: 19999
 
 # CoreDNS enabled by default in dev
 coredns_enabled: true

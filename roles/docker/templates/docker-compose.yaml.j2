@@ -90,6 +90,41 @@ services:
       - management
       - internal_db
       
+{% if deploy_netdata | default(true) %}
+  netdata:
+    image: netdata/netdata:stable
+    container_name: netdata
+    hostname: VM-AirconCheck-{{ deployment_env }}
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    labels:
+      - homepage.group={{ deployment_env | upper }}
+      - homepage.name=Netdata
+      - homepage.icon=si-netdata
+      - homepage.href=https://netdata.{{ swag_internal_url }}:8443
+      - homepage.description=Infrastructure metrics dashboard
+    volumes:
+      - {{ global_defaults.app_base_path }}/netdata/config:/etc/netdata
+      - {{ global_defaults.app_base_path }}/netdata/lib:/var/lib/netdata
+      - {{ global_defaults.app_base_path }}/netdata/cache:/var/cache/netdata
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    environment:
+      - DO_NOT_TRACK=1
+      - DOCKER_HOST=http://{{ global_defaults.docker_proxy_container_name | default('docker-socket-proxy') }}:2375
+      - NETDATA_CLAIMING_DISABLED=1
+    networks:
+      - management
+    expose:
+      - "19999"
+    restart: unless-stopped
+{% endif %}
+
 {% if deploy_angular_ssr | default(false) %}
   angular-ssr:
     build:

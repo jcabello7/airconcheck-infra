@@ -8,11 +8,11 @@ services:
       - management
     volumes:
       - {{ global_defaults.homepage_config_path }}:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       HOMEPAGE_ALLOWED_HOSTS: {{ homepage_allowed_hosts }}
       PUID: {{ global_defaults.puid }}
       PGID: {{ global_defaults.pgid }}
+      DOCKER_HOST: http://{{ global_defaults.docker_proxy_container_name | default('docker-socket-proxy') }}:2375
     restart: unless-stopped
 networks:
   proxy:

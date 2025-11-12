@@ -62,7 +62,9 @@
   vars:
     swag_internal_service_name: "{{ item.name }}"
     swag_internal_service_port: "{{ item.port }}"
-  when: not (item.name == 'airconcheck_backend' and (expose_backend_internally | default(false) | bool == false))
+  when:
+    - not (item.name == 'airconcheck_backend' and (expose_backend_internally | default(false) | bool == false))
+    - not (item.name == 'netdata' and not (deploy_netdata | default(true)))
   notify: restart swag-internal
   tags: [landpage]
 

@@ -41,6 +41,7 @@ ansible-playbook playbooks/debug-vars.yml -i inventories/test/
 | portainer       | portainer/portainer-ce:2.27.1   | 9000              | Docker UI                       |
 | swag-external   | linuxserver/swag:3.3.0          | 443, 80           | Public-facing reverse proxy     |
 | swag-internal   | linuxserver/swag:3.3.0          | 8443              | Internal reverse proxy          |
+| netdata         | netdata/netdata:stable          | 19999 (internal)  | Infrastructure metrics dashboard |
 | backend         | node:20 (Express)               | 3000 (internal)   | Backend API (served via SWAG)   |
 | mongodb         | mongo:8.0.8-noble               | 27017-27019       | MongoDB replica set             |
 
@@ -58,11 +59,11 @@ Public endpoints (via swag-external):
 
 Internal endpoints (via swag-internal):
 
-| Environment | Portainer                                   | Homepage                                   | Notes |
-|-------------|---------------------------------------------|--------------------------------------------|-------|
-| prod        | https://portainer.airconcheck.com:8443      | https://homepage.airconcheck.com:8443      |       |
-| test        | https://portainer.test.airconcheck.com:8443 | https://homepage.test.airconcheck.com:8443 |       |
-| dev         | https://portainer.dev.airconcheck.com:8443  | https://homepage.dev.airconcheck.com:8443  |       |
+| Environment | Portainer                                   | Homepage                                   | Netdata                                   | Notes |
+|-------------|---------------------------------------------|--------------------------------------------|-------------------------------------------|-------|
+| prod        | https://portainer.airconcheck.com:8443      | https://homepage.airconcheck.com:8443      | https://netdata.airconcheck.com:8443      |       |
+| test        | https://portainer.test.airconcheck.com:8443 | https://homepage.test.airconcheck.com:8443 | https://netdata.test.airconcheck.com:8443 |       |
+| dev         | https://portainer.dev.airconcheck.com:8443  | https://homepage.dev.airconcheck.com:8443  | https://netdata.dev.airconcheck.com:8443  |       |
 
 ---
 
@@ -158,6 +159,9 @@ coredns_zones:
 - `coredns_passthrough_domains` (list): FQDNs that must bypass local answers and are always forwarded upstream (for example, `mail.airconcheck.com`).
 - `coredns_passthrough_forwarders` (list, optional): override forwarders for passthrough domains; defaults to `coredns_forwarders` when empty.
 - `coredns_zones` (list): the per-environment DNS zones and records to serve.
+- `deploy_netdata` (bool): enable/disable the Netdata monitoring container and internal reverse-proxy exposure.
+- `netdata_dbengine_disk_space_mb` (int): disk space reserved for Netdata's `dbengine` (persistent metrics retention).
+- `netdata_page_cache_size_mb` (int): in-memory page cache size for Netdata's `dbengine`.
 
 `coredns_zones` schema:
 

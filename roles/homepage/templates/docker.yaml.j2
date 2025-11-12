@@ -1,3 +1,4 @@
-# Use local socket (mounted read-only)
-local:
-  socket: /var/run/docker.sock
+# Use docker-socket-proxy for container metadata
+servers:
+  docker:
+    host: http://{{ global_defaults.docker_proxy_container_name | default('docker-socket-proxy') }}:2375
