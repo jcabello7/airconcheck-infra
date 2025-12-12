@@ -12,3 +12,13 @@
     name: swag-internal
     state: started
     restart: true
+
+- name: restart zabbix-agent2
+  systemd:
+    name: zabbix-agent2
+    state: restarted
+
+- name: restart docker-proxy-socat
+  systemd:
+    name: docker-proxy-socat
+    state: restarted

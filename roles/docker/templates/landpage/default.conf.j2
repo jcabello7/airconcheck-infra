@@ -6,6 +6,12 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    error_page 404 /error_pages/404.html;
+    location = /error_pages/404.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+
     location / {
         try_files $uri $uri/ /index.html;
     }

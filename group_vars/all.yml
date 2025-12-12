@@ -80,6 +80,10 @@ docker_proxy_env:
   EVENTS: 0
   NETWORKS: 0
   INFO: 1
+  IMAGES: 1
+  SYSTEM: 1
+
+docker_proxy_unix_socket: "/var/run/docker-proxy.sock"
 
 swag_internal_services:
   - name: portainer

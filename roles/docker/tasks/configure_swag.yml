@@ -10,6 +10,8 @@
     - "{{ global_defaults.app_base_path }}/swag/internal/nginx/proxy-confs"
     - "{{ global_defaults.app_base_path }}/swag/external/dns-conf"
     - "{{ global_defaults.app_base_path }}/swag/internal/dns-conf"
+    - "{{ global_defaults.app_base_path }}/swag/external/www"
+    - "{{ global_defaults.app_base_path }}/swag/internal/www"
 
 - name: Validar token de Cloudflare cuando SWAG usa DNS-01
   assert:
@@ -135,6 +137,28 @@
     state: absent
   notify: restart swag-external
   tags: [landpage]
+
+- name: Plantillar index.html para SWAG www (external/internal)
+  template:
+    src: swag/www/index.html.j2
+    dest: "{{ global_defaults.app_base_path }}/swag/{{ item }}/www/index.html"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0644"
+  loop:
+    - external
+    - internal
+
+- name: Copiar recursos estáticos SWAG www (monkey.webp)
+  copy:
+    src: swag/www/monkey.webp
+    dest: "{{ global_defaults.app_base_path }}/swag/{{ item }}/www/monkey.webp"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0644"
+  loop:
+    - external
+    - internal
 
 - name: Eliminar configuración SWAG EXTERNAL de landpage si no se despliega
   file:

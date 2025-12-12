@@ -9,6 +9,8 @@ services:
       - homepage.description=Proxy del socket Docker (acceso restringido)
     networks:
       - management
+    ports:
+      - "127.0.0.1:2375:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 {% set env = global_defaults.docker_proxy_env | default({}) %}

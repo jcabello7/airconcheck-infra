@@ -1,0 +1,14 @@
+[Unit]
+Description=Docker socket proxy (unix bridge)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/rm -f {{ global_defaults.docker_proxy_unix_socket | default('/var/run/docker-proxy.sock') }}
+ExecStart=/usr/bin/socat UNIX-LISTEN:{{ global_defaults.docker_proxy_unix_socket | default('/var/run/docker-proxy.sock') }},fork,unlink-close=0,user=root,group=zabbix,perm=0660 TCP:127.0.0.1:2375
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

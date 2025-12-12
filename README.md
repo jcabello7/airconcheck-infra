@@ -162,6 +162,7 @@ coredns_zones:
 - `deploy_netdata` (bool): enable/disable the Netdata monitoring container and internal reverse-proxy exposure.
 - `netdata_dbengine_disk_space_mb` (int): disk space reserved for Netdata's `dbengine` (persistent metrics retention).
 - `netdata_page_cache_size_mb` (int): in-memory page cache size for Netdata's `dbengine`.
+- `docker_proxy_unix_socket` (string): path to the unix socket that proxies to the restricted Docker API (used by Zabbix Agent 2).
 
 `coredns_zones` schema:
 

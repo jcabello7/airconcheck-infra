@@ -28,7 +28,10 @@
     mode: '0775'
   loop:
     - "{{ global_defaults.app_base_path }}/landpage/html"
+    - "{{ global_defaults.app_base_path }}/landpage/html/error_pages"
     - "{{ global_defaults.app_base_path }}/landpage/nginx"
+    - "{{ global_defaults.app_base_path }}/swag/external/www"
+    - "{{ global_defaults.app_base_path }}/swag/internal/www"
     - "{{ global_defaults.angular_ssr_build_context | default(global_defaults.app_base_path + '/angular-ssr') }}"
     - "{{ global_defaults.backend_build_context | default(global_defaults.app_base_path + '/backend') }}"
     - "{{ global_defaults.app_base_path }}/netdata/config"

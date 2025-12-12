@@ -39,6 +39,12 @@
     state: present
     update_cache: yes
 
+- name: Install helpers for docker integrations
+  apt:
+    name:
+      - socat
+    state: present
+
 - name: Enable and start Docker
   systemd:
     name: docker
@@ -84,6 +90,26 @@
   when: deploy_landpage | default(false) and not (landpage_index_stat.stat.exists | default(false))
   tags: [landpage]
 
+- name: Ensure landpage error_pages directory exists
+  file:
+    path: "{{ global_defaults.app_base_path }}/landpage/html/error_pages"
+    state: directory
+    owner: dockeruser
+    group: dockeruser
+    mode: "0755"
+  when: deploy_landpage | default(false)
+  tags: [landpage]
+
+- name: Render landpage 404.html error page
+  template:
+    src: templates/landpage/404.html.j2
+    dest: "{{ global_defaults.app_base_path }}/landpage/html/error_pages/404.html"
+    owner: dockeruser
+    group: dockeruser
+    mode: "0664"
+  when: deploy_landpage | default(false)
+  tags: [landpage]
+
 - name: Render landpage nginx default.conf (SPA fallback)
   template:
     src: templates/landpage/default.conf.j2
@@ -94,6 +120,9 @@
   when: deploy_landpage | default(false)
   tags: [landpage]
 
+- name: Gather service facts
+  service_facts:
+
 - name: Render Netdata configuration (persistent dbengine)
   template:
     src: templates/netdata/netdata.conf.j2
@@ -102,6 +131,48 @@
     group: dockeruser
     mode: "0644"
   when: deploy_netdata | default(true)
+
+- name: Configurar puente unix para docker-socket-proxy
+  when: configure_zabbix_docker_plugin | default(true)
+  block:
+    - name: Plantilla servicio systemd docker-proxy-socat
+      template:
+        src: templates/zabbix/docker-proxy-socat.service.j2
+        dest: /etc/systemd/system/docker-proxy-socat.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart docker-proxy-socat
+
+    - name: Recargar systemd tras instalar docker-proxy-socat
+      systemd:
+        daemon_reload: yes
+
+    - name: Asegurar docker-proxy-socat activo
+      systemd:
+        name: docker-proxy-socat
+        state: started
+        enabled: true
+
+- name: Configurar plugin Docker de Zabbix Agent 2
+  block:
+    - name: Plantilla docker.conf para Zabbix Agent 2
+      template:
+        src: templates/zabbix/docker.conf.j2
+        dest: /etc/zabbix/zabbix_agent2.d/docker.conf
+        owner: root
+        group: zabbix
+        mode: '0640'
+      notify: restart zabbix-agent2
+
+    - name: Retirar docker.conf legacy en plugins.d
+      file:
+        path: /etc/zabbix/zabbix_agent2.d/plugins.d/docker.conf
+        state: absent
+  when:
+    - configure_zabbix_docker_plugin | default(true)
+    - ansible_facts.services is defined
+    - (ansible_facts.services | default({})).get('zabbix-agent2.service') is not none
 
  
 
