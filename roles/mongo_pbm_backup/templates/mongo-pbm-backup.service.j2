@@ -1,0 +1,10 @@
+[Unit]
+Description=Percona Backup for MongoDB scheduled backup command
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory={{ mongo_pbm_base_dir }}
+ExecStart=/usr/bin/env bash -c '{{ mongo_pbm_docker_binary }} compose -f {{ mongo_pbm_compose_file }} run --rm {{ mongo_pbm_service_name }} pbm backup {{ mongo_pbm_backup_extra_args }} --description "{{ mongo_pbm_backup_description_prefix }}-$(date +%%F_%%H-%%M-%%S)"'
+TimeoutStartSec=0

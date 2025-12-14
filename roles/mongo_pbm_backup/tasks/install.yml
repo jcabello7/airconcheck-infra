@@ -1,0 +1,31 @@
+---
+- name: Ensure mongo_pbm_backup directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ mongo_pbm_user }}"
+    group: "{{ mongo_pbm_group }}"
+    mode: "{{ item.mode | default(mongo_pbm_dir_mode) }}"
+  loop:
+    - { path: "{{ mongo_pbm_base_dir }}" }
+    - { path: "{{ mongo_pbm_config_dir }}" }
+    - { path: "{{ mongo_pbm_backups_dir }}" }
+
+- name: Deploy PBM docker compose definition
+  ansible.builtin.template:
+    src: docker-compose.mongo-pbm.yml.j2
+    dest: "{{ mongo_pbm_compose_file }}"
+    owner: "{{ mongo_pbm_user }}"
+    group: "{{ mongo_pbm_group }}"
+    mode: "0640"
+
+- name: Ensure PBM compose project is up to date
+  community.docker.docker_compose_v2:
+    project_src: "{{ mongo_pbm_base_dir }}"
+    files:
+      - "{{ mongo_pbm_compose_file }}"
+    project_name: "{{ mongo_pbm_compose_project_name }}"
+    state: present
+    services:
+      - "{{ mongo_pbm_service_name }}"
+  register: mongo_pbm_compose_up

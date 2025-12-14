@@ -1,0 +1,24 @@
+services:
+  {{ mongo_pbm_service_name }}:
+    image: {{ mongo_pbm_image }}
+    container_name: {{ mongo_pbm_container_name }}
+    restart: unless-stopped
+{% if mongo_pbm_container_user is defined and mongo_pbm_container_user | length > 0 %}
+    user: "{{ mongo_pbm_container_user }}"
+{% endif %}
+    command: ["sleep", "infinity"]  # Keep container ready for exec-driven pbm commands
+    environment:
+      PBM_MONGODB_URI: "{{ mongo_pbm_mongodb_uri }}"
+      PBM_CONFIG_PATH: "/pbm/config/pbm-config.yaml"
+{% for key, value in mongo_pbm_extra_environment.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+    volumes:
+      - {{ mongo_pbm_config_dir }}:/pbm/config:ro
+      - {{ mongo_pbm_backups_dir }}:/pbm/backups
+    networks:
+      - {{ mongo_pbm_docker_network }}
+
+networks:
+  {{ mongo_pbm_docker_network }}:
+    external: true

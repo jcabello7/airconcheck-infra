@@ -45,3 +45,6 @@ coredns_zones:
       - type: A
         name: '*'
         value: TAILSCALE_SELF
+
+# Mongo PBM backup defaults (test)
+mongo_pbm_s3_prefix: "test/"

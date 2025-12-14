@@ -54,6 +54,7 @@
     - mongo_express
     - docker_socket_proxy
     - homepage
+    - mongo_pbm_backup
 #    - pmm
 #    - percona_backup_for_mongodb
 

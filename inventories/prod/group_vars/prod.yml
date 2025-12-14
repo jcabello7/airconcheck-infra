@@ -50,6 +50,10 @@ coredns_apex_internal: false
 # Landpage in prod: if true, landpage serves apex (airconcheck.com) and angular-ssr moves to app.airconcheck.com
 landpage_apex_enabled: true
 
+# Mongo PBM backup defaults (prod)
+mongo_pbm_backup_oncalendar: "daily"
+mongo_pbm_s3_prefix: "prod/"
+
 # -------------------------------------------------
 # Bootstrap (prod) — variables necesarias
 # Rellena este bloque antes de ejecutar playbooks/bootstrap_prod.yml

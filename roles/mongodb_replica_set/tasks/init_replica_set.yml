@@ -202,6 +202,49 @@
   register: pmm_user_created
   changed_when: '"created" in pmm_user_created.stdout'
 
+- name: Create / verify PBM user on PRIMARY
+  shell: >-
+    docker exec {{ primary_container_name }}
+    mongosh -u {{ mongo_root_user }}
+    -p '{{ mongo_root_password }}'
+    --authenticationDatabase admin --quiet --eval '
+      const adminDb = db.getSiblingDB("admin");
+      const desiredRoles = [
+        {role:"backup", db:"admin"},
+        {role:"restore", db:"admin"},
+        {role:"clusterAdmin", db:"admin"},
+        {role:"readWriteAnyDatabase", db:"admin"}
+      ];
+      const userName = "{{ mongo_pbm_mongodb_user | default('') | replace('"', '\\"') }}";
+      const userPwd = "{{ mongo_pbm_mongodb_password | default('') | replace('"', '\\"') }}";
+      if (!userName || !userPwd) {
+        print("PBM user skipped");
+        quit(0);
+      }
+      const existing = adminDb.getUser(userName);
+      function rolesEqual(a, b) {
+        if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+          return false;
+        }
+        return a.every(roleA => b.some(roleB => roleA.role === roleB.role && roleA.db === roleB.db));
+      }
+      if (!existing) {
+        adminDb.createUser({ user: userName, pwd: userPwd, roles: desiredRoles });
+        print("PBM user created");
+      } else if (!rolesEqual(existing.roles || [], desiredRoles)) {
+        adminDb.updateUser(userName, { roles: desiredRoles });
+        print("PBM user roles updated");
+      } else {
+        print("PBM user already exists");
+      }'
+  register: pbm_user_created
+  changed_when: '"created" in pbm_user_created.stdout or "updated" in pbm_user_created.stdout'
+  when:
+    - mongo_pbm_mongodb_user is defined
+    - mongo_pbm_mongodb_user | length > 0
+    - mongo_pbm_mongodb_password is defined
+    - mongo_pbm_mongodb_password | length > 0
+
 - name: Create MongoDB app user (if not exists)
   shell: |
     docker exec mongo-jumpbox mongosh "{{ global_defaults.mongo_rs_uri }}" --quiet --eval '

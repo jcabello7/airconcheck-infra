@@ -1,0 +1,10 @@
+[Unit]
+Description=Schedule Percona Backup for MongoDB executions
+
+[Timer]
+OnCalendar={{ mongo_pbm_backup_oncalendar }}
+Persistent=true
+Unit={{ mongo_pbm_systemd_service }}
+
+[Install]
+WantedBy=timers.target

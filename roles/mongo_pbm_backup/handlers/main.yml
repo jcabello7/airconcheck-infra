@@ -1,0 +1,21 @@
+---
+- name: Reload systemd daemon
+  ansible.builtin.command: systemctl daemon-reload
+  changed_when: false
+
+- name: Restart mongo pbm backup timer
+  ansible.builtin.systemd:
+    name: "{{ mongo_pbm_systemd_timer }}"
+    state: restarted
+  listen: Restart mongo pbm backup timer
+
+- name: Apply PBM configuration
+  ansible.builtin.command:
+    cmd: >-
+      {{ mongo_pbm_docker_binary }} compose -f {{ mongo_pbm_compose_file }}
+      run --rm {{ mongo_pbm_service_name }}
+      pbm config --file /pbm/config/pbm-config.yaml
+  register: mongo_pbm_apply_config_result
+  changed_when: "mongo_pbm_apply_config_result.rc == 0"
+  failed_when: mongo_pbm_apply_config_result.rc != 0
+  when: mongo_pbm_apply_config

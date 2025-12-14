@@ -1,0 +1,13 @@
+---
+- name: Render PBM configuration file
+  ansible.builtin.template:
+    src: pbm-config.yaml.j2
+    dest: "{{ mongo_pbm_config_file }}"
+    owner: "{{ mongo_pbm_user }}"
+    group: "{{ mongo_pbm_group }}"
+    mode: "{{ mongo_pbm_config_mode }}"
+  notify: Apply PBM configuration
+
+- name: Flush PBM configuration handler when immediate apply requested
+  ansible.builtin.meta: flush_handlers
+  when: mongo_pbm_apply_config

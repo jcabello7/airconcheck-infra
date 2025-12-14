@@ -1,0 +1,46 @@
+- name: Normalize PBM replica host list
+  ansible.builtin.set_fact:
+    mongo_pbm_effective_hosts: "{{ (mongo_pbm_replicaset_members | default(['mongo1:27017','mongo2:27017','mongo3:27017'])) | list }}"
+
+- name: Derive PBM MongoDB URI when not provided
+  ansible.builtin.set_fact:
+    mongo_pbm_mongodb_uri: >-
+      mongodb://{{ _mongo_pbm_user }}:{{ _mongo_pbm_password | urlencode }}@{{ _mongo_pbm_hosts | join(',') }}/{{ _mongo_pbm_database }}?replicaSet={{ _mongo_pbm_rs }}&authSource={{ _mongo_pbm_auth_db }}
+  vars:
+    _mongo_pbm_user: "{{ mongo_pbm_mongodb_user | default(mongo_pmm_user | default('')) }}"
+    _mongo_pbm_password: "{{ mongo_pbm_mongodb_password | default(mongo_pmm_password | default('')) }}"
+    _mongo_pbm_hosts: "{{ mongo_pbm_effective_hosts }}"
+    _mongo_pbm_database: "{{ mongo_pbm_target_db | default(mongo_app_db | default('airconcheck')) }}"
+    _mongo_pbm_rs: "{{ mongo_pbm_replicaset_name | default(mongo_replicaset_name | default('rs0')) }}"
+    _mongo_pbm_auth_db: "{{ mongo_pbm_auth_db | default('admin') }}"
+  when:
+    - mongo_pbm_mongodb_uri | length == 0
+    - _mongo_pbm_user | length > 0
+    - _mongo_pbm_password | length > 0
+
+- name: Validate core mongo_pbm_backup variables
+  ansible.builtin.assert:
+    that:
+      - mongo_pbm_mongodb_uri | length > 0
+      - mongo_pbm_docker_network | length > 0
+      - mongo_pbm_storage_type in ['s3', 'filesystem']
+    fail_msg: "mongo_pbm_backup role requires MongoDB URI, docker network, and a supported storage type."
+
+- name: Validate S3 configuration when requested
+  ansible.builtin.assert:
+    that:
+      - mongo_pbm_s3_access_key is defined
+      - mongo_pbm_s3_secret_key is defined
+      - mongo_pbm_s3_region is defined
+      - mongo_pbm_s3_bucket is defined
+    fail_msg: "S3 storage selected but required S3 parameters are missing."
+  when: mongo_pbm_storage_type == 's3'
+
+- name: Include install tasks
+  ansible.builtin.include_tasks: install.yml
+
+- name: Include configuration tasks
+  ansible.builtin.include_tasks: config.yml
+
+- name: Include scheduling tasks
+  ansible.builtin.include_tasks: systemd.yml

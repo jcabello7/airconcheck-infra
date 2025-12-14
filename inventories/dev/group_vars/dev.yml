@@ -48,3 +48,6 @@ coredns_zones:
 
 # Reconfigurar RS a DNS públicos (dev) en dos fases
 mongodb_public_member_dns: true
+
+# Mongo PBM backup defaults (dev)
+mongo_pbm_s3_prefix: "dev/"

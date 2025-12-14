@@ -1,5 +1,5 @@
 [test]
-vm-test-airconcheck.localdomain ansible_user=ansible ansible_become=true ansible_ssh_private_key_file=~/.ssh/ansible
+vm-test-airconcheck.int.rootme.io ansible_user=ansible ansible_become=true ansible_ssh_private_key_file=~/.ssh/ansible
 
 [all:children]
 test

@@ -1,0 +1,50 @@
+---
+# Base paths
+mongo_pbm_base_dir: /opt/airconcheck/mongo_pbm
+mongo_pbm_config_dir: "{{ mongo_pbm_base_dir }}/config"
+mongo_pbm_backups_dir: "{{ mongo_pbm_base_dir }}/backups"
+mongo_pbm_compose_file: "{{ mongo_pbm_base_dir }}/docker-compose.mongo-pbm.yml"
+mongo_pbm_config_file: "{{ mongo_pbm_config_dir }}/pbm-config.yaml"
+
+# Ownership and permissions
+mongo_pbm_user: root
+mongo_pbm_group: root
+mongo_pbm_dir_mode: "0750"
+mongo_pbm_config_mode: "0600"
+
+# Container settings
+mongo_pbm_image: "percona/percona-backup-mongodb:latest"
+mongo_pbm_container_name: "mongo-pbm-backup"
+mongo_pbm_service_name: "mongo_pbm_backup"
+mongo_pbm_compose_project_name: "mongo_pbm_backup"
+mongo_pbm_docker_network: "internal_db"
+mongo_pbm_docker_binary: "/usr/bin/docker"
+mongo_pbm_container_user: "0:0"
+mongo_pbm_extra_environment: {}
+
+# MongoDB connection handling
+mongo_pbm_replicaset_members:
+  - "mongo1:27017"
+  - "mongo2:27017"
+  - "mongo3:27017"
+mongo_pbm_replicaset_name: "{{ mongo_replicaset_name | default('rs0') }}"
+mongo_pbm_auth_db: "admin"
+mongo_pbm_target_db: "{{ mongo_app_db | default('airconcheck') }}"
+mongo_pbm_mongodb_user: "{{ mongo_pmm_user | default('airconcheck-pmm') }}"
+mongo_pbm_mongodb_password: "{{ mongo_pmm_password | default('') }}"
+mongo_pbm_mongodb_uri: ""
+
+# Storage configuration
+mongo_pbm_storage_type: "s3"
+mongo_pbm_filesystem_path: "{{ mongo_pbm_backups_dir }}"
+
+# Backup scheduling and execution
+mongo_pbm_backup_oncalendar: "daily"
+mongo_pbm_backup_description_prefix: "scheduled"
+mongo_pbm_backup_extra_args: "--compression=s2"
+mongo_pbm_systemd_service: "mongo-pbm-backup.service"
+mongo_pbm_systemd_timer: "mongo-pbm-backup.timer"
+mongo_pbm_systemd_unit_dir: "/etc/systemd/system"
+
+# PBM behavior
+mongo_pbm_apply_config: true
