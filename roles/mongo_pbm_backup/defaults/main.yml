@@ -5,6 +5,8 @@ mongo_pbm_config_dir: "{{ mongo_pbm_base_dir }}/config"
 mongo_pbm_backups_dir: "{{ mongo_pbm_base_dir }}/backups"
 mongo_pbm_compose_file: "{{ mongo_pbm_base_dir }}/docker-compose.mongo-pbm.yml"
 mongo_pbm_config_file: "{{ mongo_pbm_config_dir }}/pbm-config.yaml"
+mongo_pbm_scripts_dir: "{{ mongo_pbm_base_dir }}/bin"
+mongo_pbm_state_dir: "{{ mongo_pbm_base_dir }}/state"
 
 # Ownership and permissions
 mongo_pbm_user: root
@@ -39,12 +41,35 @@ mongo_pbm_storage_type: "s3"
 mongo_pbm_filesystem_path: "{{ mongo_pbm_backups_dir }}"
 
 # Backup scheduling and execution
-mongo_pbm_backup_oncalendar: "daily"
+mongo_pbm_backup_oncalendar: "daily"  # legacy variable kept for backwards compatibility
+mongo_pbm_daily_backup_oncalendar: "{{ mongo_pbm_backup_oncalendar }}"
+mongo_pbm_weekly_backup_oncalendar: "Sun *-*-* 03:30:00"
 mongo_pbm_backup_description_prefix: "scheduled"
+mongo_pbm_daily_backup_description_prefix: "{{ mongo_pbm_backup_description_prefix }}"
+mongo_pbm_weekly_backup_description_prefix: "weekly"
 mongo_pbm_backup_extra_args: "--compression=s2"
+mongo_pbm_daily_backup_extra_args: "{{ mongo_pbm_backup_extra_args }}"
+mongo_pbm_weekly_backup_extra_args: "{{ mongo_pbm_backup_extra_args }}"
+mongo_pbm_weekly_backup_enabled: true
+mongo_pbm_daily_retention_days: 31
+mongo_pbm_weekly_retention_weeks: 52
+mongo_pbm_weekly_retention_days: "{{ mongo_pbm_weekly_retention_weeks * 7 }}"
+mongo_pbm_daily_cleanup_oncalendar: "*-*-* 03:30:00"
+mongo_pbm_weekly_cleanup_oncalendar: "Sun *-*-* 04:30:00"
+mongo_pbm_daily_cleanup_enabled: true
+mongo_pbm_weekly_cleanup_enabled: "{{ mongo_pbm_weekly_backup_enabled }}"
 mongo_pbm_systemd_service: "mongo-pbm-backup.service"
 mongo_pbm_systemd_timer: "mongo-pbm-backup.timer"
+mongo_pbm_weekly_systemd_service: "mongo-pbm-weekly-backup.service"
+mongo_pbm_weekly_systemd_timer: "mongo-pbm-weekly-backup.timer"
+mongo_pbm_daily_cleanup_service: "mongo-pbm-daily-cleanup.service"
+mongo_pbm_daily_cleanup_timer: "mongo-pbm-daily-cleanup.timer"
+mongo_pbm_weekly_cleanup_service: "mongo-pbm-weekly-cleanup.service"
+mongo_pbm_weekly_cleanup_timer: "mongo-pbm-weekly-cleanup.timer"
 mongo_pbm_systemd_unit_dir: "/etc/systemd/system"
+mongo_pbm_scheduler_script: "{{ mongo_pbm_scripts_dir }}/mongo-pbm-scheduler.py"
+mongo_pbm_daily_log_file: "{{ mongo_pbm_state_dir }}/daily-backups.jsonl"
+mongo_pbm_weekly_log_file: "{{ mongo_pbm_state_dir }}/weekly-backups.jsonl"
 
 # PBM behavior
 mongo_pbm_apply_config: true

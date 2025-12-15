@@ -5,18 +5,16 @@ storage:
   s3:
     bucket: "{{ mongo_pbm_s3_bucket }}"
     region: "{{ mongo_pbm_s3_region }}"
-    awsAccessKeyID: "{{ mongo_pbm_s3_access_key }}"
-    awsSecretAccessKey: "{{ mongo_pbm_s3_secret_key }}"
-{% if mongo_pbm_s3_endpoint is defined and mongo_pbm_s3_endpoint | length > 0 %}
-    endpointUrl: "{{ mongo_pbm_s3_endpoint }}"
-{% endif %}
 {% if mongo_pbm_s3_prefix is defined and mongo_pbm_s3_prefix | length > 0 %}
     prefix: "{{ mongo_pbm_s3_prefix }}"
 {% endif %}
+{% if mongo_pbm_s3_endpoint is defined and mongo_pbm_s3_endpoint | length > 0 %}
+    endpointUrl: "{{ mongo_pbm_s3_endpoint }}"
+{% endif %}
+    credentials:
+      access-key-id: "{{ mongo_pbm_s3_access_key }}"
+      secret-access-key: "{{ mongo_pbm_s3_secret_key }}"
 {% elif mongo_pbm_storage_type == 'filesystem' %}
   filesystem:
     path: "{{ mongo_pbm_filesystem_path }}"
 {% endif %}
-
-mongodb:
-  uri: "{{ mongo_pbm_mongodb_uri }}"

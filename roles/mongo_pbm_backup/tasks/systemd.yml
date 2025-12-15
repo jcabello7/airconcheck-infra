@@ -1,29 +1,143 @@
 ---
-- name: Deploy mongo_pbm_backup systemd service unit
+- name: Deploy daily PBM backup service unit
   ansible.builtin.template:
     src: mongo-pbm-backup.service.j2
     dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_systemd_service }}"
     owner: root
     group: root
     mode: "0644"
+  vars:
+    unit_description: "Percona Backup for MongoDB daily backup"
+    service_exec_command: "{{ mongo_pbm_scheduler_script }} backup --schedule daily"
   notify:
     - Reload systemd daemon
     - Restart mongo pbm backup timer
 
-- name: Deploy mongo_pbm_backup systemd timer unit
+- name: Deploy daily PBM backup timer unit
   ansible.builtin.template:
     src: mongo-pbm-backup.timer.j2
     dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_systemd_timer }}"
     owner: root
     group: root
     mode: "0644"
+  vars:
+    timer_description: "Trigger PBM daily backups"
+    oncalendar: "{{ mongo_pbm_daily_backup_oncalendar }}"
+    unit_name: "{{ mongo_pbm_systemd_service }}"
   notify:
     - Reload systemd daemon
     - Restart mongo pbm backup timer
 
-- name: Ensure mongo_pbm_backup timer is enabled and running
+- name: Deploy weekly PBM backup service unit
+  ansible.builtin.template:
+    src: mongo-pbm-backup.service.j2
+    dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_weekly_systemd_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    unit_description: "Percona Backup for MongoDB weekly backup"
+    service_exec_command: "{{ mongo_pbm_scheduler_script }} backup --schedule weekly"
+  when: mongo_pbm_weekly_backup_enabled | bool
+  notify:
+    - Reload systemd daemon
+    - Restart mongo pbm weekly backup timer
+
+- name: Deploy weekly PBM backup timer unit
+  ansible.builtin.template:
+    src: mongo-pbm-backup.timer.j2
+    dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_weekly_systemd_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    timer_description: "Trigger PBM weekly backups"
+    oncalendar: "{{ mongo_pbm_weekly_backup_oncalendar }}"
+    unit_name: "{{ mongo_pbm_weekly_systemd_service }}"
+  when: mongo_pbm_weekly_backup_enabled | bool
+  notify:
+    - Reload systemd daemon
+    - Restart mongo pbm weekly backup timer
+
+- name: Deploy PBM daily cleanup service unit
+  ansible.builtin.template:
+    src: mongo-pbm-backup.service.j2
+    dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_daily_cleanup_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    unit_description: "Cleanup PBM daily backups older than {{ mongo_pbm_daily_retention_days }} days"
+    service_exec_command: "{{ mongo_pbm_scheduler_script }} cleanup --schedule daily"
+  when: mongo_pbm_daily_cleanup_enabled | bool
+  notify:
+    - Reload systemd daemon
+    - Restart mongo pbm daily cleanup timer
+
+- name: Deploy PBM daily cleanup timer unit
+  ansible.builtin.template:
+    src: mongo-pbm-backup.timer.j2
+    dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_daily_cleanup_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    timer_description: "Trigger PBM daily cleanup"
+    oncalendar: "{{ mongo_pbm_daily_cleanup_oncalendar }}"
+    unit_name: "{{ mongo_pbm_daily_cleanup_service }}"
+  when: mongo_pbm_daily_cleanup_enabled | bool
+  notify:
+    - Reload systemd daemon
+    - Restart mongo pbm daily cleanup timer
+
+- name: Deploy PBM weekly cleanup service unit
+  ansible.builtin.template:
+    src: mongo-pbm-backup.service.j2
+    dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_weekly_cleanup_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    unit_description: "Cleanup PBM weekly backups older than {{ mongo_pbm_weekly_retention_days }} days"
+    service_exec_command: "{{ mongo_pbm_scheduler_script }} cleanup --schedule weekly"
+  when: mongo_pbm_weekly_cleanup_enabled | bool
+  notify:
+    - Reload systemd daemon
+    - Restart mongo pbm weekly cleanup timer
+
+- name: Deploy PBM weekly cleanup timer unit
+  ansible.builtin.template:
+    src: mongo-pbm-backup.timer.j2
+    dest: "{{ mongo_pbm_systemd_unit_dir }}/{{ mongo_pbm_weekly_cleanup_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    timer_description: "Trigger PBM weekly cleanup"
+    oncalendar: "{{ mongo_pbm_weekly_cleanup_oncalendar }}"
+    unit_name: "{{ mongo_pbm_weekly_cleanup_service }}"
+  when: mongo_pbm_weekly_cleanup_enabled | bool
+  notify:
+    - Reload systemd daemon
+    - Restart mongo pbm weekly cleanup timer
+
+- name: Build PBM timer enable list
+  ansible.builtin.set_fact:
+    mongo_pbm_timer_targets:
+      - name: "{{ mongo_pbm_systemd_timer }}"
+        enabled: true
+      - name: "{{ mongo_pbm_weekly_systemd_timer }}"
+        enabled: "{{ mongo_pbm_weekly_backup_enabled | bool }}"
+      - name: "{{ mongo_pbm_daily_cleanup_timer }}"
+        enabled: "{{ mongo_pbm_daily_cleanup_enabled | bool }}"
+      - name: "{{ mongo_pbm_weekly_cleanup_timer }}"
+        enabled: "{{ mongo_pbm_weekly_cleanup_enabled | bool }}"
+
+- name: Ensure PBM timers are enabled and running
   ansible.builtin.systemd:
-    name: "{{ mongo_pbm_systemd_timer }}"
+    name: "{{ item.name }}"
     enabled: true
     state: started
     daemon_reload: true
+  loop: "{{ mongo_pbm_timer_targets }}"
+  when: item.enabled | bool

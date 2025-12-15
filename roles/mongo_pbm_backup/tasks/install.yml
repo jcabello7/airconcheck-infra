@@ -10,6 +10,8 @@
     - { path: "{{ mongo_pbm_base_dir }}" }
     - { path: "{{ mongo_pbm_config_dir }}" }
     - { path: "{{ mongo_pbm_backups_dir }}" }
+    - { path: "{{ mongo_pbm_scripts_dir }}" }
+    - { path: "{{ mongo_pbm_state_dir }}" }
 
 - name: Deploy PBM docker compose definition
   ansible.builtin.template:
@@ -29,3 +31,11 @@
     services:
       - "{{ mongo_pbm_service_name }}"
   register: mongo_pbm_compose_up
+
+- name: Deploy PBM scheduler helper script
+  ansible.builtin.template:
+    src: mongo-pbm-scheduler.py.j2
+    dest: "{{ mongo_pbm_scheduler_script }}"
+    owner: "{{ mongo_pbm_user }}"
+    group: "{{ mongo_pbm_group }}"
+    mode: "0750"

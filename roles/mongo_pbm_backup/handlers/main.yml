@@ -9,6 +9,24 @@
     state: restarted
   listen: Restart mongo pbm backup timer
 
+- name: Restart mongo pbm weekly backup timer
+  ansible.builtin.systemd:
+    name: "{{ mongo_pbm_weekly_systemd_timer }}"
+    state: restarted
+  listen: Restart mongo pbm weekly backup timer
+
+- name: Restart mongo pbm daily cleanup timer
+  ansible.builtin.systemd:
+    name: "{{ mongo_pbm_daily_cleanup_timer }}"
+    state: restarted
+  listen: Restart mongo pbm daily cleanup timer
+
+- name: Restart mongo pbm weekly cleanup timer
+  ansible.builtin.systemd:
+    name: "{{ mongo_pbm_weekly_cleanup_timer }}"
+    state: restarted
+  listen: Restart mongo pbm weekly cleanup timer
+
 - name: Apply PBM configuration
   ansible.builtin.command:
     cmd: >-

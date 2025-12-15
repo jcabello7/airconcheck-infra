@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Helpers to run scheduled PBM backups and enforce retention windows."""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import pathlib
+import shlex
+import subprocess
+import sys
+from typing import Any, Dict, List
+
+BASE_CMD: List[str] = json.loads('{{ [mongo_pbm_docker_binary, "compose", "-f", mongo_pbm_compose_file, "run", "--rm", mongo_pbm_service_name, "pbm"] | tojson }}')
+
+{% set _schedule_config = {
+  'daily': {
+    'enabled': True,
+    'log_file': mongo_pbm_daily_log_file,
+    'description_prefix': mongo_pbm_daily_backup_description_prefix,
+    'extra_args': mongo_pbm_daily_backup_extra_args,
+    'retention_days': mongo_pbm_daily_retention_days,
+  },
+  'weekly': {
+    'enabled': mongo_pbm_weekly_backup_enabled,
+    'log_file': mongo_pbm_weekly_log_file,
+    'description_prefix': mongo_pbm_weekly_backup_description_prefix,
+    'extra_args': mongo_pbm_weekly_backup_extra_args,
+    'retention_days': mongo_pbm_weekly_retention_days,
+  }
+} %}
+SCHEDULE_CONFIG: Dict[str, Dict[str, Any]] = json.loads('{{ _schedule_config | tojson }}')
+
+LOG_TS_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+def _raise(msg: str) -> None:
+    print(msg, file=sys.stderr)
+    sys.exit(1)
+
+
+def _ensure_schedule(name: str) -> Dict[str, Any]:
+    cfg = SCHEDULE_CONFIG.get(name)
+    if not cfg:
+        _raise(f"Unknown schedule '{name}'")
+    if not cfg.get("enabled", True):
+        _raise(f"Schedule '{name}' is disabled")
+    return cfg
+
+
+def _run(cmd: List[str], *, capture_output: bool = False, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(cmd, text=True, capture_output=capture_output, check=check)
+
+
+def _append_log(log_file: pathlib.Path, entry: Dict[str, Any]) -> None:
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry))
+        handle.write("\n")
+
+
+def _read_log(log_file: pathlib.Path) -> List[Dict[str, Any]]:
+    if not log_file.exists():
+        return []
+    entries: List[Dict[str, Any]] = []
+    with log_file.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entries.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return entries
+
+
+def _write_log(log_file: pathlib.Path, entries: List[Dict[str, Any]]) -> None:
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = log_file.with_suffix(".tmp")
+    with tmp_path.open("w", encoding="utf-8") as handle:
+        for entry in entries:
+            handle.write(json.dumps(entry))
+            handle.write("\n")
+    tmp_path.replace(log_file)
+
+
+def _parse_extra_args(raw: str | None) -> List[str]:
+    return shlex.split(raw) if raw else []
+
+
+def _utc_now() -> dt.datetime:
+    return dt.datetime.utcnow().replace(microsecond=0)
+
+
+def _run_backup(schedule: str) -> None:
+    cfg = _ensure_schedule(schedule)
+    description = f"{cfg['description_prefix']}-{_utc_now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    cmd = BASE_CMD + [
+        "backup",
+        "--wait",
+        "--out=json",
+    ]
+    cmd.extend(_parse_extra_args(cfg.get("extra_args")))
+    result = _run(cmd, capture_output=True)
+    stdout = (result.stdout or "").strip()
+    if not stdout:
+        _raise("PBM backup command did not return JSON output")
+    try:
+        payload = json.loads(stdout.splitlines()[-1])
+    except json.JSONDecodeError as exc:
+        _raise(f"Unable to parse PBM output: {exc}\n{stdout}")
+    backup_name = payload.get("name")
+    if not backup_name:
+        _raise(f"PBM output missing backup name: {payload}")
+    entry = {
+        "name": backup_name,
+        "schedule": schedule,
+        "description": description,
+        "taken_at": _utc_now().strftime(LOG_TS_FORMAT),
+    }
+    _append_log(pathlib.Path(cfg["log_file"]), entry)
+    print(f"[{schedule}] Backup {backup_name} completed")
+
+
+def _run_cleanup(schedule: str) -> None:
+    cfg = _ensure_schedule(schedule)
+    retention_days = int(cfg["retention_days"])
+    log_file = pathlib.Path(cfg["log_file"])
+    entries = _read_log(log_file)
+    if not entries:
+        print(f"[{schedule}] No recorded backups to evaluate")
+        return
+    cutoff = _utc_now() - dt.timedelta(days=retention_days)
+    keep: List[Dict[str, Any]] = []
+    removed = 0
+    for entry in entries:
+        taken_at_raw = entry.get("taken_at")
+        if not taken_at_raw:
+            keep.append(entry)
+            continue
+        try:
+            taken_at = dt.datetime.fromisoformat(taken_at_raw.replace("Z", "+00:00"))
+        except ValueError:
+            keep.append(entry)
+            continue
+        if taken_at > cutoff:
+            keep.append(entry)
+            continue
+        backup_name = entry.get("name")
+        if not backup_name:
+            continue
+        cmd = BASE_CMD + ["delete-backup", backup_name]
+        try:
+            _run(cmd, capture_output=True)
+            removed += 1
+            print(f"[{schedule}] Deleted expired backup {backup_name}")
+        except subprocess.CalledProcessError as exc:
+            print(
+                f"[{schedule}] Failed to delete {backup_name}: {exc.stderr or exc.stdout}",
+                file=sys.stderr,
+            )
+            keep.append(entry)
+    _write_log(log_file, keep)
+    print(f"[{schedule}] Cleanup removed {removed} backups; {len(keep)} remain tracked")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="PBM backup scheduler helper")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    backup_parser = subparsers.add_parser("backup", help="Run a scheduled backup")
+    backup_parser.add_argument("--schedule", required=True)
+
+    cleanup_parser = subparsers.add_parser("cleanup", help="Enforce retention policy")
+    cleanup_parser.add_argument("--schedule", required=True)
+
+    args = parser.parse_args()
+    if args.command == "backup":
+        _run_backup(args.schedule)
+    elif args.command == "cleanup":
+        _run_cleanup(args.schedule)
+    else:
+        parser.error("Unknown command")
+
+
+if __name__ == "__main__":
+    main()
