@@ -26,6 +26,26 @@
     group: "999"
     mode: "0400"
 
+- name: Derive PBM agent credentials
+  ansible.builtin.set_fact:
+    mongodb_pbm_agent_user_effective: "{{ mongodb_pbm_agent_user | default(mongo_pbm_mongodb_user | default(mongo_pmm_user | default('')), true) }}"
+    mongodb_pbm_agent_password_effective: "{{ mongodb_pbm_agent_password | default(mongo_pbm_mongodb_password | default(mongo_pmm_password | default('')), true) }}"
+    mongodb_pbm_agent_auth_db_effective: "{{ mongodb_pbm_agent_auth_db | default(mongo_pbm_auth_db | default('admin'), true) }}"
+  when: mongodb_pbm_agent_enabled | default(false)
+
+- name: Validate PBM agent prerequisites
+  ansible.builtin.assert:
+    that:
+      - mongodb_pbm_agent_user_effective is defined
+      - mongodb_pbm_agent_user_effective | length > 0
+      - mongodb_pbm_agent_password_effective is defined
+      - mongodb_pbm_agent_password_effective | length > 0
+    fail_msg: >-
+      PBM agents are enabled but no credentials were provided. Set
+      mongo_pbm_mongodb_user/mongo_pbm_mongodb_password (or the
+      mongodb_pbm_agent_* overrides).
+  when: mongodb_pbm_agent_enabled | default(false)
+
 
 - name: Copy docker-compose template for MongoDB Replica Set
   template:

@@ -1,0 +1,15 @@
+---
+# Enable or disable deployment of PBM agents alongside MongoDB members
+mongodb_pbm_agent_enabled: true
+
+# Image and runtime settings for PBM agents
+mongodb_pbm_agent_image: "percona/percona-backup-mongodb:latest"
+mongodb_pbm_agent_log_level: "info"
+mongodb_pbm_agent_extra_env: {}
+
+# Optional overrides for PBM credentials/auth DB. When left empty, the role
+# will fall back to mongo_pbm_* (or mongo_pmm_*) variables already defined in
+# group vars.
+mongodb_pbm_agent_user: ""
+mongodb_pbm_agent_password: ""
+mongodb_pbm_agent_auth_db: ""

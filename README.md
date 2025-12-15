@@ -44,6 +44,7 @@ ansible-playbook playbooks/debug-vars.yml -i inventories/test/
 | netdata         | netdata/netdata:stable          | 19999 (internal)  | Infrastructure metrics dashboard |
 | backend         | node:20 (Express)               | 3000 (internal)   | Backend API (served via SWAG)   |
 | mongodb         | mongo:8.0.8-noble               | 27017-27019       | MongoDB replica set             |
+| mongo*-pbm-agent| percona/percona-backup-mongodb  | internal only     | PBM agents (one sidecar per replica member) |
 
 ---
 
@@ -248,6 +249,46 @@ landpage_apex_enabled: false  # si true, angular-ssr → app.airconcheck.com y l
 - If non-authoritative lookups fail, verify `coredns_forwarders` or the `/etc/resolv.conf` fallback on the host.
 - Confirm your Tailscale Split DNS points the intended zone(s) to the server’s Tailscale IP.
 - CoreDNS reloads on file changes; if in doubt, redeploy the role via the main playbook.
+
+---
+
+## 🛡️ MongoDB Backups (Percona PBM)
+
+The `mongo_pbm_backup` role provisions Percona Backup for MongoDB end to end: it renders `/opt/airconcheck/mongo_pbm/docker-compose.mongo-pbm.yml`, pushes an opinionated scheduler helper (`bin/mongo-pbm-scheduler.py`), and installs systemd timers/services for daily/weekly backups plus retention cleanups (`mongo-pbm-backup*.service|timer`, `mongo-pbm-*-cleanup*.service|timer`). Backups are written to the configured S3 bucket/prefix and every execution is appended to JSONL logs under `/opt/airconcheck/mongo_pbm/state/`.
+
+### PBM agents per MongoDB member
+- The MongoDB replica-set role now deploys one `percona/percona-backup-mongodb` sidecar per `mongo{1,2,3}` container (`mongo*-pbm-agent`). The sidecars keep a persistent `pbm-agent` process connected to their colocated `mongod`, satisfying PBM’s requirement of “one agent per replica member”.
+- Tweak or disable these sidecars via [roles/mongodb_replica_set/defaults/main.yml](roles/mongodb_replica_set/defaults/main.yml):
+  - `mongodb_pbm_agent_enabled`: master switch (defaults to `true`).
+  - `mongodb_pbm_agent_image`, `mongodb_pbm_agent_log_level`, `mongodb_pbm_agent_extra_env`: runtime tuning knobs.
+  - `mongodb_pbm_agent_user|password|auth_db`: optional overrides; otherwise the role reuses the PBM/PMM credentials already defined in `group_vars`.
+
+### Operating PBM
+- Verify connectivity & agents:
+
+```bash
+cd /opt/airconcheck/mongo_pbm
+/usr/bin/docker compose -f docker-compose.mongo-pbm.yml run --rm mongo_pbm_backup pbm status
+```
+
+- Trigger an immediate backup (useful after tweaking config) and monitor logs:
+
+```bash
+/usr/bin/docker compose -f docker-compose.mongo-pbm.yml run --rm mongo_pbm_backup pbm backup --wait --out=json
+systemctl start mongo-pbm-backup.service
+journalctl -u mongo-pbm-backup.service -n 30 --no-pager
+```
+
+- List stored snapshots and confirm retention:
+
+```bash
+/usr/bin/docker compose -f docker-compose.mongo-pbm.yml run --rm mongo_pbm_backup pbm list
+```
+
+### Configuration checklist
+- Populate the S3 variables (bucket, region, credentials, optional endpoint/prefix) in `group_vars/*/secrets.yml` — the PBM role validates them before deploying.
+- Keep `mongo_pbm_mongodb_user|mongo_pbm_mongodb_password` (or the PMM equivalents) in sync so both the scheduler and the agents can authenticate.
+- Systemd timers are enabled automatically; use `systemctl list-timers 'mongo-pbm-*'` to confirm schedules or `systemctl status mongo-pbm-<unit>.service` for troubleshooting.
 
 ---
 

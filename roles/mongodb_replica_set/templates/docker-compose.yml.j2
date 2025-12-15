@@ -96,6 +96,27 @@ services:
       - "27019:27017"
 {% endif %}
 
+{% if mongodb_pbm_agent_enabled %}
+{% for member in ['mongo1', 'mongo2', 'mongo3'] %}
+  {{ member }}-pbm-agent:
+    image: {{ mongodb_pbm_agent_image }}
+    container_name: {{ member }}-pbm-agent
+    restart: unless-stopped
+    depends_on:
+      - {{ member }}
+    environment:
+      PBM_MONGODB_URI: "mongodb://{{ mongodb_pbm_agent_user_effective | default('') }}:{{ (mongodb_pbm_agent_password_effective | default('')) | urlencode }}@{{ member }}:27017/?replicaSet={{ global_defaults.mongo_replicaset_name }}&authSource={{ mongodb_pbm_agent_auth_db_effective | default('admin') }}"
+      PBM_AGENT_LOG_LEVEL: "{{ mongodb_pbm_agent_log_level }}"
+{% for key, value in mongodb_pbm_agent_extra_env.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+    command:
+      - pbm-agent
+    networks:
+      - internal_db
+{% endfor %}
+{% endif %}
+
 volumes:
   mongo1-data:
   mongo2-data:
